@@ -1,0 +1,22 @@
+\newcount\a % Variable für die erste Zahl
+\newcount\b % Variable für die zweite Zahl
+\newcount\result % Variable für das Ergebnis
+\newcount\temp % Temporäre Variable
+
+% Makro für Modulo-Berechnung
+\def\modulo#1#2#3{%
+  \a=#1\relax % Setze die erste Zahl
+  \b=#2\relax % Setze die zweite Zahl
+  \temp=\a % Kopiere den Wert von a in temp
+  \divide\temp by \b % Ganzzahlige Division (temp = a / b)
+  \multiply\temp by \b % Multipliziere zurück (temp = (a / b) * b)
+  \advance\a by -\temp % Subtrahiere temp von a (a = a - temp)
+  #3=\a\relax % Speichere das Ergebnis in der Ausgabevariable
+}
+
+% Beispiel
+\modulo{13}{5}{\result} % Berechne 13 modulo 5
+
+% Ausgabe
+13 modulo 5 ist \the\result.
+\bye

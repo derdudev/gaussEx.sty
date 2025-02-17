@@ -1,0 +1,50 @@
+\documentclass{article}
+
+% Makro für Modulo-Berechnung
+\def\modulo#1#2#3{%
+    \newcount\a % Variable für die erste Zahl
+    \newcount\b % Variable für die zweite Zahl
+    \newcount\result % Variable für das Ergebnis
+    \newcount\temp % Temporäre Variable
+  \a=#1\relax % Setze die erste Zahl
+  \b=#2\relax % Setze die zweite Zahl
+  \temp=\a % Kopiere den Wert von a in temp
+  \divide\temp by \b % Ganzzahlige Division (temp = a / b)
+  \multiply\temp by \b % Multipliziere zurück (temp = (a / b) * b)
+  \advance\a by -\temp % Subtrahiere temp von a (a = a - temp)
+  #3=\a\relax % Speichere das Ergebnis in der Ausgabevariable
+}
+
+\newdimen\gtab
+\gtab=2\arraycolsep 
+
+\newcount\iacol
+\newcount\iarow
+
+\def\extraspace{%
+    \newcount\result%
+    \ifnum\iarow=0%
+        \result=\iacol%
+    \else%
+        \modulo{\iacol}{2}{\result}%
+    \fi%
+    \ifnum\result=1%
+        \kern\gtab%
+    \fi%
+    \global\advance\iacol by 1%
+}
+
+\def\ialignes{%
+    \def\\{%
+        \ifnum\iarow=1%
+            \vspace\gtab%
+        \fi%
+        \global\advance\iarow by 1%
+        \cr
+    }%
+    \ialign{\hfil##\hfil&&\extraspace\hfil##\hfil\cr 1 & 2 & 3\\ 4 & 5 & 6\\ 7 & 8 & 9\\ 10 & 11 & 12\cr}
+}
+
+\begin{document}
+    \ialignes{}
+\end{document}
