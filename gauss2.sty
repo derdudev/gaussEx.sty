@@ -1312,8 +1312,7 @@
    \g@measureArea{cy}{0}{\the\g@maxcol}{sum}%
    \g@dim{sum}{\ht\g@northbox}%
    \global\setbox\g@northbox=\hbox{%
-    %CHANGE\raise\colarrowsep\box\g@northbox}%
-    \box\g@northbox}%
+    \raise\colarrowsep\box\g@northbox}%
  }%
 %    \end{macrocode}
 % 3.\ Initialization of the |\colops| region: Define the operation macros to be 
