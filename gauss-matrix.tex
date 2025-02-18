@@ -176,16 +176,12 @@ Hello Gordon, how are you?
     \gdim{h}{\matrixheight}
     \gdefdouble{innermatrixheight}{\matrixheight}
     %\put(\gdouble{cx3},-\gdouble{ry\the\gmaxrow}){\line(0,-1){\gdouble{innermatrixheight}}}
-    \newdimen\diff
-    \newdimen\temp
-    \gdim{rb\the\gmaxrow}{\diff}
-    \gdim{d}{\temp}
-    \advance\diff -0.5\temp
-    \gdefdouble{vdivbaseline}{\diff}
-    \put(\gdouble{cm3},\gdouble{vdivbaseline}){\line(0,1){\gdouble{innermatrixheight}}} % vertical divider
+    \put(\gdouble{cm3},0){\line(0,1){\gdouble{innermatrixheight}}} % vertical divider
     %\put(\gdouble{cx3},\gdouble{rb\the\gmaxrow}){\line(0,1){\gdouble{innermatrixheight}}}
     %\put(\gdouble{cx2},\gdouble{rb\the\gmaxrow}){\line(0,1){\gdouble{innermatrixheight}}}
     %
+    \newdimen\diff
+    \newdimen\temp
     \gdim{rb1}{\diff}
     \gdim{rt2}{\temp}
     \advance\diff -\temp
