@@ -1013,6 +1013,7 @@
 \def\g@measureCols{%
  \setbox\g@trash\lastbox
  \ifdim \wd\g@trash=100cm%
+  \typeout{Erster}%
   % base case. Invert the ordering and sum the dimensions.
   \g@defdouble{ct\the\g@maxcol}{0}%
   \g@defdouble{cy\the\g@maxcol}{0}%
@@ -1023,10 +1024,13 @@
   \global\advance\g@maxcol-1%
  \else
   \ifdim \ht\g@trash=0pt%
+    \wlog{Zweiter}%
    \advance\g@d@tmp\lastskip\unskip
+   %\wlog{\the\lastkern}
    \advance\g@d@tmp\lastkern\unkern
    \unpenalty
   \else
+  \typeout{Dritter}%
    % use ct temporaryly to store the skip between
    % colnr + 1 and colnr.
    \g@defdim{ct\the\g@maxcol}{\g@d@tmp}%
@@ -1055,10 +1059,17 @@
   \advance\g@c@tmpa-1
   \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
   \g@dim{ct\the\g@c@tmp}{\g@d@tmpb}% glue right to this cell
+  %\wlog{Hallo \the\g@d@tmpb}
+  \ifnum\g@c@tmpa=3
+    \advance\g@d@tmp.5\g@tab
+  \fi
   \g@defdim{cm\the\g@c@tmpa}{\g@d@tmp}%
   \advance\g@d@tmp.5\g@d@tmpa%
   \g@defdouble{cy\the\g@c@tmp}{0}%
   \g@defdim{cx\the\g@c@tmpa}{\g@d@tmp}%
+  \ifnum\g@c@tmpa=3
+    \advance\g@d@tmp-.5\g@tab
+  \fi
   \advance\g@d@tmp.5\g@d@tmpa
   \advance\g@d@tmp\g@d@tmpb
   \ifnum \g@c@tmpa=0%
@@ -1750,7 +1761,7 @@
 %    \begin{macrocode}
  \g@measureAxis
  \setbox\g@trash=\vbox{%
-  \unvcopy\g@matrixbox
+  \unvcopy\g@matrixbox% unboxes g@matrixbox: copies the content of the vbox into this vbox but does not empty the box register g@matrixbox
 %    \end{macrocode}
 % Copy the last row of the matrix into |\g@eastbox| and reinsert it to the vbox.
 %    \begin{macrocode}

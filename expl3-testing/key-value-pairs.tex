@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage{expl3}
+
+\ExplSyntaxOn
+
+% Initialize variables
+\cs_new:Nn \gex_init:
+  {
+    \tl_new:N \l_ges_cols_tl
+    \tl_new:N \l_ges_rows_tl
+  }
+
+% Define keys
+\cs_new_protected:Nn \gex_keys_define:
+  {
+    \keys_define:nn { gex }
+      {
+        cols .tl_set:N = \l_ges_cols_tl,
+        rows .tl_set:N = \l_ges_rows_tl,
+      }
+  }
+
+% Parse input
+\cs_new_protected:Nn \gex_process_keys:n
+  {
+    \keys_set:nn { my/module } { #1 }
+  }
+
+% Main command for testing
+\cs_new_protected:Nn \gex_test:n
+  {
+    \ges_init: % Initialize variables
+    \ges_keys_define: % Define keys
+    \ges_process_keys:n { #1 } % Parse input
+    % Print values for testing
+    cols:~\tl_use:N \l_ges_cols_tl \\
+    rows:~\tl_use:N \l_ges_rows_tl
+  }
+
+\NewDocumentCommand \testkeys { m }
+  {
+    \ges_test:n { #1 }
+  }
+
+\ExplSyntaxOff
+
+\begin{document}
+
+\testkeys{cols=valueA, rows=valueB}
+
+\end{document}

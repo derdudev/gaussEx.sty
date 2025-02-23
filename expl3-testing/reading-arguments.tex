@@ -1,0 +1,88 @@
+\documentclass{article}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\parsearraylayout}{m}
+ {
+  \parse_layout:n { #1 } \\
+  \seq_show:N \g_gex_caligns
+  \seq_show:N \g_gex_cseps
+  \bitset_show:N \g_gex_cdivs
+  \bitset_item:Nn \g_gex_cdivs { 3 }
+  \seq_show:N \g_gex_cdiv_olens
+ }
+
+% Main parsing function
+\cs_new_protected:Npn \parse_layout:n #1
+ {
+  \seq_new:N \l_parsed_seq % Declare the sequence variable
+  \tl_set:Nn \l_tmpa_tl { #1 } % Store the input string in a token list
+
+  \seq_new:N \g_gex_caligns
+  \seq_new:N \g_gex_cseps
+  \bitset_new:N \g_gex_cdivs
+  \seq_new:N \g_gex_cdiv_olens
+
+  % Use regex to split the string
+  \regex_extract_all:nVN { [lcr]|\||[SO]\cB\{ \c[^BE].* \cE\} } { \l_tmpa_tl } \l_parsed_seq
+  \seq_show:N \l_parsed_seq
+  \seq_map_inline:Nn \l_parsed_seq
+   {
+    \tl_if_blank:nF { ##1 }
+     {
+      \parse_token:n { ##1 }
+     }
+   }
+ }
+
+% Function to handle individual tokens
+\cs_new_protected:Npn \parse_token:n #1
+ {
+  \str_case:nnF { #1 }
+   {
+    {c}{ 
+        \seq_gput_right:Nn \g_gex_caligns { c }
+        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cdiv_olens { }
+        Column\ detected:\ centered \\
+     }
+    {l}{ 
+        \seq_gput_right:Nn \g_gex_caligns { l }
+        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cdiv_olens { }
+        Column\ detected:\ left-aligned \\
+     }
+    {r}{ 
+        \seq_gput_right:Nn \g_gex_caligns { r }
+        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cdiv_olens { }
+        Column\ detected:\ right-aligned \\
+     }
+    {|}{ 
+        \exp_args:NNx \bitset_gset_true:Nn \g_gex_cdivs { \seq_count:N \g_gex_caligns } 
+        Rule\ detected \\ 
+    }
+   }
+   {
+    \str_case:en { \tl_head:n { #1 } }
+    {
+        {S}{ 
+            \regex_extract_once:nnN { S\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cseps { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            Custom\ separation\ detected:\ \texttt{\tl_to_str:n{#1}}\\ 
+        }
+        {O}{
+            \regex_extract_once:nnN { O\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cdiv_olens { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            Custom~bar-overlength~detected:~\texttt{\tl_to_str:n{#1}}\\ 
+        }
+    }
+   }
+ }
+\ExplSyntaxOff
+
+\begin{document}
+
+% Test the command
+\parsearraylayout{cccS{\kern -10pt}|O{10pt}rr}
+
+\end{document}

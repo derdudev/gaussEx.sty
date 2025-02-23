@@ -1,0 +1,24 @@
+\tracingoutput=1
+\showboxdepth=5
+\showboxbreadth=100
+
+% SYNOPSIS: The second time, \lastbox is called, it does nothing. This is because in the second row, after the \hbox containing "Z", there is some glue. So right before \lasbox gets called in l14, the last element in the list is not an hbox or vbox, but glue! Thus \lastbox does not remove anything and the register of box0 remains void (after being emptied by \unhbox0). See TeXBook, p. 220. 
+
+\vbox{%
+    \ialign{\hfil#\hfil&&\kern 10pt\hfil#\hfil\cr
+         A & B & CCCC \cr
+         D & E & F \cr
+         X & Y & Z \cr}%
+    \setbox0=\lastbox%
+    \hbox{%
+        A
+        \unhbox0
+        \setbox0=\lastbox
+    }
+    %\setbox0=\lastbox
+    %\dimen0=\ht0
+    %\the\dimen0
+    %\box0
+}
+
+\bye

@@ -1,0 +1,15 @@
+\tracingoutput=1
+\showboxdepth=5
+\showboxbreadth=100
+
+% SYNPOSIS: Grouping has no effect on the "current list". 
+
+\vbox{
+    \hbox{A}
+    {%
+        \setbox0=\lastbox
+        %\box0
+    }
+}
+
+\bye

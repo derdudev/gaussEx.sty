@@ -1,0 +1,18 @@
+\tracingoutput=1
+\showboxdepth=5
+\showboxbreadth=100
+
+\setbox0=\hbox{\hbox{A}\hbox{B}}
+
+\vbox{
+    \hbox{\hbox{A}\hbox{B}}
+    \hbox{\hbox{C}\hbox{D}\hskip 0pt plus 1em}
+    \setbox0=\lastbox
+    \hbox{%
+        \unhbox0
+        \setbox0=\lastbox
+        % SYNOPSIS: "IF the last element of the current list is a hbox or vbox, it is removed" (TeXBook) => The last element is the glue from \hskip and thus not removed!
+    }
+}
+
+\bye

@@ -1,0 +1,11 @@
+\tracingoutput=1
+\showboxdepth=5
+\showboxbreadth=100
+
+%  SYNOPSIS: Glue gets recalculated (within the set bounds of e.g. a used \hskip) when it is unboxed. See TeXBook, p. 120
+
+\setbox0 = \hbox{A\hskip 10pt plus 10pt\hbox{B C}}
+\hbox to 1.05\wd0{\unhcopy0}
+\noindent\unhbox0
+
+\bye
