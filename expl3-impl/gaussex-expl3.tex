@@ -20,7 +20,7 @@
     \seq_show:N \g_gex_caligns
     \seq_show:N \g_gex_cseps
     \bitset_show:N \g_gex_cdivs
-    \bitset_item:Nn \g_gex_cdivs { 3 }
+    %\bitset_item:Nn \g_gex_cdivs { 3 }
     \seq_show:N \g_gex_cdiv_olens
  }
 
@@ -132,7 +132,7 @@
 \def\g@measureCols{%
     \setbox\g@trash\lastbox
     \ifdim \wd\g@trash=100cm%
-        \typeout{Erster}%
+        %\typeout{Erster}%
         % base case. Invert the ordering and sum the dimensions.
         \g@defdouble{ct\the\g@maxcol}{0}%
         \g@defdouble{cy\the\g@maxcol}{0}%
@@ -143,13 +143,13 @@
         \global\advance\g@maxcol-1%
     \else
         \ifdim \ht\g@trash=0pt%
-            \wlog{Zweiter}%
+            %\wlog{Zweiter}%
             \advance\g@d@tmp\lastskip\unskip
             %\wlog{\the\lastkern}
             \advance\g@d@tmp\lastkern\unkern
             \unpenalty
         \else
-            \typeout{Dritter}%
+            %\typeout{Dritter}%
             % use ct temporaryly to store the skip between
             % colnr + 1 and colnr.
             \g@defdim{ct\the\g@maxcol}{\g@d@tmp}%
@@ -164,10 +164,10 @@
 \def\g@measureColsSucc{%
     %\expandafter\wlog{\int_eval:n\g@c@tmp} 
     \exp_args:NNe \int_set:Nn \l_tmpa_int { \g@c@tmp }
-    \exp_args:Ne\iow_log:n { \int_use:N \l_tmpa_int }
+    %\exp_args:Ne\iow_log:n { \int_use:N \l_tmpa_int }
     \if_int_compare:w\l_tmpa_int<0\else
         \g@c@tmpa=\g@maxcol
-        \expandafter\wlog{Innen: \the\g@c@tmp}
+        %\expandafter\wlog{Innen: \the\g@c@tmp}
         \advance\g@c@tmpa-\g@c@tmp
         \advance\g@c@tmpa-1
         \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
@@ -261,7 +261,7 @@
         \advance\g@d@tmp-\opskip
     \fi
     \advance\g@d@tmp.5\ht\g@matrixbox
-    \advance\g@d@tmp.5\dp\g@matrixbox
+    \advance\g@d@tmp.5\dp\g@matrixbox%
     \begin{\g@environment}%
     %\rule{5pt}{\z@}% CHANGE: So kann Abstand zu den Klammern eingeführt werden
     \vcenter{\hbox{% vcenter, da sonst alles in relation zu baseline positioniert wird
@@ -325,7 +325,7 @@
             % ADD THE VERTICAL SPACING HERE VIA \NOALIGN{\VSKIP PLUS 0PT MINUS 0PT}
             %
             \global\advance\g@maxrow1\relax%
-            \global\g@iacol=1
+            \global\g@iacol=1\relax
         }%
         \global\let\g@endregion\g@endmatrix
         \global\g@tab=2\arraycolsep
@@ -341,14 +341,12 @@
   \global\let\colops\g@north
 }
 
-%\edef\g@post{\relax$} % $ 
-
 \makeatother
 
 \begin{document}
 
 \begin{align*}
-    \begin{gmatrixex}[cS{10pt}ccS{10 pt}|rr]
+    A=\begin{gmatrixex}[cS{10pt}ccS{10 pt}|rr]
         4 & 3 & 5 & 1 & 0 \\ 
         5 & 3 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
