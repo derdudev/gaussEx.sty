@@ -1,0 +1,15 @@
+\documentclass{article}
+
+\newdimen\gdtmp
+
+\begin{document}
+Hallo
+\ExplSyntaxOn
+% Update the \g@d@tmp dimension register
+\dim_add:Nn \gdtmp { 10pt + 5pt }
+
+% Print its value
+\dim_show:n { \gdtmp }
+\ExplSyntaxOff
+
+\end{document}

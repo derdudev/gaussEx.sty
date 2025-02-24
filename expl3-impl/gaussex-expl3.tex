@@ -54,17 +54,17 @@
    {
     {c}{ 
         \seq_gput_right:Nn \g_gex_caligns { c }
-        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cseps { 0pt }
         \seq_gput_right:Nn \g_gex_cdiv_olens { }
      }
     {l}{ 
         \seq_gput_right:Nn \g_gex_caligns { l }
-        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cseps { 0pt }
         \seq_gput_right:Nn \g_gex_cdiv_olens { }
      }
     {r}{ 
         \seq_gput_right:Nn \g_gex_caligns { r }
-        \seq_gput_right:Nn \g_gex_cseps { }
+        \seq_gput_right:Nn \g_gex_cseps { 0pt }
         \seq_gput_right:Nn \g_gex_cdiv_olens { }
      }
     {|}{ 
@@ -124,6 +124,77 @@
     \begin{picture}(\g@double{w},0)(0,0)
       \linethickness{\g@linethickness}
 }
+
+%
+% NEW @measureCols and @measureColsSucc
+%
+\ExplSyntaxOn
+\def\g@measureCols{%
+    \setbox\g@trash\lastbox
+    \ifdim \wd\g@trash=100cm%
+        \typeout{Erster}%
+        % base case. Invert the ordering and sum the dimensions.
+        \g@defdouble{ct\the\g@maxcol}{0}%
+        \g@defdouble{cy\the\g@maxcol}{0}%
+        \global\g@maxcol\g@maxcol
+        \g@c@tmp\g@maxcol
+        \advance\g@c@tmp-1%
+        \g@measureColsSucc
+        \global\advance\g@maxcol-1%
+    \else
+        \ifdim \ht\g@trash=0pt%
+            \wlog{Zweiter}%
+            \advance\g@d@tmp\lastskip\unskip
+            %\wlog{\the\lastkern}
+            \advance\g@d@tmp\lastkern\unkern
+            \unpenalty
+        \else
+            \typeout{Dritter}%
+            % use ct temporaryly to store the skip between
+            % colnr + 1 and colnr.
+            \g@defdim{ct\the\g@maxcol}{\g@d@tmp}%
+            \g@d@tmp\z@
+            % use cy temporaryly to store the cell's width.
+            \g@defdim{cy\the\g@maxcol}{\wd\g@trash}%
+            \advance\g@maxcol1%
+        \fi
+        \g@measureCols
+    \fi
+}
+\def\g@measureColsSucc{%
+    %\expandafter\wlog{\int_eval:n\g@c@tmp} 
+    \exp_args:NNe \int_set:Nn \l_tmpa_int { \g@c@tmp }
+    \exp_args:Ne\iow_log:n { \int_use:N \l_tmpa_int }
+    \if_int_compare:w\l_tmpa_int<0\else
+        \g@c@tmpa=\g@maxcol
+        \expandafter\wlog{Innen: \the\g@c@tmp}
+        \advance\g@c@tmpa-\g@c@tmp
+        \advance\g@c@tmpa-1
+        \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
+        \g@dim{ct\the\g@c@tmp}{\g@d@tmpb}% glue right to this cell
+        %\wlog{Hallo \the\g@d@tmpb}
+        \advance\g@c@tmpa by 1%
+        %\exp_args:Ne\iow_log:n { -\seq_item:Nn \g_gex_cseps { \g@c@tmpa } }
+        \dim_add:Nn \g@d@tmp { -0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa }  }
+        \advance\g@c@tmpa by -1%
+        \g@defdim{cm\the\g@c@tmpa}{\g@d@tmp}%
+        \advance\g@d@tmp.5\g@d@tmpa%
+        \g@defdouble{cy\the\g@c@tmp}{0}%
+        \g@defdim{cx\the\g@c@tmpa}{\g@d@tmp}%
+        \advance\g@c@tmpa by 1%
+        %\exp_args:Ne\iow_log:n { \dim_eval:n {-0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa } } }
+        \dim_add:Nn \g@d@tmp { 0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa } }
+        \advance\g@c@tmpa by -1%
+        \advance\g@d@tmp.5\g@d@tmpa
+        \advance\g@d@tmp\g@d@tmpb
+        \ifnum \g@c@tmpa=0%
+            \advance\g@d@tmp.5\g@tab
+        \fi
+        \advance\g@c@tmp-1
+        \g@measureColsSucc
+    \fi
+}
+\ExplSyntaxOff 
 
 %
 % NEW @endmatrix USING gex@
@@ -225,10 +296,8 @@
 \ExplSyntaxOn
 \def\g@extraspace{%
     %\texttt{\the\g@iacol}
-    \seq_item:NV \g_gex_cseps { \g@iacol }
-    \ifnum\g@iacol=2%
-        \kern\g@tab%
-    \fi%
+    %\seq_item:Nn \g_gex_cseps { \g@iacol }
+    \exp_args:Ne \skip_horizontal:n { \exp_args:NNe \seq_item:Nn \g_gex_cseps { \the\g@iacol } }
     \global\advance\g@iacol by 1%
 }
 \ExplSyntaxOff
@@ -242,7 +311,7 @@
     \global\g@maxcol@old\g@maxcol
     \global\g@maxrow0%
     \global\g@maxcol0%
-    \global\g@iacol0%
+    \global\g@iacol1%
     \let\rowops\g@east
     \let\colops\g@north
     \let\matrixdivs\g@center
@@ -250,14 +319,17 @@
         \normalbaselines% fix spacing for align environments
         % count rows while typesetting
         \def\\{% needed to get redefined: \cr needs to come last so vertical spacing can be inserted with \noalign{\vskip <x>pt}
-        \mathstrut%
-        \global\advance\g@maxrow1\relax%
-        \global\g@iacol=0
-        \cr%
+            \mathstrut%
+            \cr%
+            %
+            % ADD THE VERTICAL SPACING HERE VIA \NOALIGN{\VSKIP PLUS 0PT MINUS 0PT}
+            %
+            \global\advance\g@maxrow1\relax%
+            \global\g@iacol=1
         }%
         \global\let\g@endregion\g@endmatrix
         \global\g@tab=2\arraycolsep
-        \ialign\bgroup\g@prae##\g@post&&\g@extraspace\kern\g@tab\g@prae##\g@post\cr
+        \ialign\bgroup\g@prae##\g@post\g@extraspace&&\kern\g@tab\g@prae##\g@post\g@extraspace\cr
 }{%
     \g@endregion
   \egroup % end of \hbox which is put into g@trash in g@endmatrix or the north-, east- or centerbox from g@north, g@east or g@center
@@ -276,8 +348,8 @@
 \begin{document}
 
 \begin{align*}
-    \begin{gmatrixex}[cccS{10pt}|rr]
-        4 & 3 & 5 & 1 & 0\\ 
+    \begin{gmatrixex}[cccS{10 pt}|rr]
+        4 & 3 & 5 & 1 & 0 \\ 
         5 & 3 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
         0 & 1 & 0 &\\
