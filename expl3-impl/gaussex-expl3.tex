@@ -173,7 +173,7 @@
         \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
         \g@dim{ct\the\g@c@tmp}{\g@d@tmpb}% glue right to this cell
         %\wlog{Hallo \the\g@d@tmpb}
-        \advance\g@c@tmpa by 1%
+        \advance\g@c@tmpa by 1% Raising by 1 is necessary as the indexing of a expl3-sequence is 1-based, not 0-based
         %\exp_args:Ne\iow_log:n { -\seq_item:Nn \g_gex_cseps { \g@c@tmpa } }
         \dim_add:Nn \g@d@tmp { -0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa }  }
         \advance\g@c@tmpa by -1%
@@ -181,7 +181,7 @@
         \advance\g@d@tmp.5\g@d@tmpa%
         \g@defdouble{cy\the\g@c@tmp}{0}%
         \g@defdim{cx\the\g@c@tmpa}{\g@d@tmp}%
-        \advance\g@c@tmpa by 1%
+        \advance\g@c@tmpa by 1% Raising by 1 is necessary as the indexing of a expl3-sequence is 1-based, not 0-based
         %\exp_args:Ne\iow_log:n { \dim_eval:n {-0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa } } }
         \dim_add:Nn \g@d@tmp { 0.5pt * \seq_item:Nn \g_gex_cseps { \g@c@tmpa } }
         \advance\g@c@tmpa by -1%
@@ -297,7 +297,7 @@
 \def\g@extraspace{%
     %\texttt{\the\g@iacol}
     %\seq_item:Nn \g_gex_cseps { \g@iacol }
-    \exp_args:Ne \skip_horizontal:n { \exp_args:NNe \seq_item:Nn \g_gex_cseps { \the\g@iacol } }
+    \exp_args:Ne \skip_horizontal:n { \exp_args:NNe \seq_item:Nn \g_gex_cseps { \g@iacol } }
     \global\advance\g@iacol by 1%
 }
 \ExplSyntaxOff
@@ -348,7 +348,7 @@
 \begin{document}
 
 \begin{align*}
-    \begin{gmatrixex}[cccS{10 pt}|rr]
+    \begin{gmatrixex}[cS{10pt}ccS{10 pt}|rr]
         4 & 3 & 5 & 1 & 0 \\ 
         5 & 3 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
