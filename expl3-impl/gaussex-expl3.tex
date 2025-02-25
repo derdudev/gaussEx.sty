@@ -469,7 +469,7 @@
     \global\advance\g@iacol by 1%
 }
 
-\edef\g@prae{\hfil\noexpand\mathstrut$\relax}
+\edef\g@prae{\hfil\noexpand\mathstrut$\relax} % the \mathstrut is needed so that the paranthesis of pmatrix, etc  wrap correctly
 \edef\g@post{\relax$\hfil} 
 \newenvironment{gex@matrix}
 {%
@@ -487,11 +487,26 @@
         % count rows while typesetting
         \def\\{% needed to get redefined: \cr needs to come last so vertical spacing can be inserted with \noalign{\vskip <x>pt}
             \mathstrut%
-            \cr%
+            \global\advance\g@maxrow1\relax%
             %
             % ADD THE VERTICAL SPACING HERE VIA \NOALIGN{\VSKIP PLUS 0PT MINUS 0PT}
             %
-            \global\advance\g@maxrow1\relax%
+            % 1) get the row separation
+            % 2) test if tow separation is zero ? <Yes> \cr : <No> \cr \noalign{}; 
+            \exp_args:NNe \tl_set:Nn \l_tmpa_tl { \seq_item:Nn \g_gex_rseps { \the\g@maxrow } }
+            \tl_if_eq:NnTF \l_tmpa_tl { 0pt } 
+            {
+                \cr
+            }
+            {
+                \cr
+                \noalign{
+                    %\exp_args:Ne \iow_log:n { ROWSEP1~\seq_item:Nn \g_gex_rseps { \the\g@maxrow } } 
+                    %\exp_args:Ne \iow_log:n { ROWSEP2~\l_tmpa_tl }
+                    % has to be done in this way, as for some reason \l_tmpa_tl has the value from gex_parse_row/col_opts
+                    \skip_vertical:n { \seq_item:Nn \g_gex_rseps { \the\g@maxrow } } 
+                }
+            }
             \global\g@iacol=1\relax
         }%
         \global\let\g@endregion\gex@endmatrix
@@ -514,9 +529,9 @@
 \begin{document}
 
 \begin{align*}
-    A=\begin{gexmatrix}[cols=ccc|cc, rows=xx|xxx]
+    A=\begin{gexmatrix}[cols=ccc|cc, rows=xxS{4pt}|xxx]
         4 & 3 & 5 & 1 & 0 \\ 
-        5 & 3 & 5 & 0 & -1 \\
+        1 & 4 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
         0 & 1 & 0 &\\
         0 & 0 & 1b & & 
@@ -528,7 +543,7 @@
     \end{gexmatrix}
 \end{align*}
 \begin{align*}
-    A=\begin{gexmatrix}[cols=cccS{10pt}|r]
+    A=\begin{gexmatrix}[cols=cccS{10pt}|r, rows=xx]
         4 & 3 & 5 & 1 \\ 
         5 & 3 & 5 & 0
     \end{gexmatrix}
