@@ -23,29 +23,29 @@
 % Parse input
 \cs_new_protected:Nn \gex_process_keys:n
   {
-    \keys_set:nn { my/module } { #1 }
+    \keys_set:nn { gex } { #1 }
   }
 
 % Main command for testing
 \cs_new_protected:Nn \gex_test:n
   {
-    \ges_init: % Initialize variables
-    \ges_keys_define: % Define keys
-    \ges_process_keys:n { #1 } % Parse input
+    \gex_init: % Initialize variables
+    \gex_keys_define: % Define keys
+    \gex_process_keys:n { #1 } % Parse input
     % Print values for testing
-    cols:~\tl_use:N \l_ges_cols_tl \\
+    cols:~$\tl_use:N \l_ges_cols_tl\right.$ \\
     rows:~\tl_use:N \l_ges_rows_tl
   }
 
 \NewDocumentCommand \testkeys { m }
   {
-    \ges_test:n { #1 }
+    \gex_test:n { #1 }
   }
 
 \ExplSyntaxOff
 
 \begin{document}
 
-\testkeys{cols=valueA, rows=valueB}
+\testkeys{cols=\left\{, rows=valueB, A=B}
 
 \end{document}

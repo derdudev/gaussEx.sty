@@ -6,87 +6,174 @@
 
 \ExplSyntaxOn
 
+%
+% DEFINE KEYS
+%
+\tl_new:N \l_gex_col_opts
+\tl_new:N \l_gex_row_opts
+
+\keys_define:nn { gex }
+{
+    cols .tl_set:N = \l_gex_col_opts,
+    rows .tl_set:N = \l_gex_row_opts,
+}
+\NewDocumentCommand{\gexsetkeys}{m}
+{
+    \keys_set:nn { gex } { #1 }
+}
+
 \seq_new:N \l__parsed_seq % Declare the sequence variable
 
+% Column variables
 \seq_new:N \g_gex_caligns
 \seq_new:N \g_gex_cseps
 \seq_new:N \g_gex_cdivs
 \seq_new:N \g_gex_cdiv_olens
 
-\NewDocumentCommand{\ggexparsearraylayout}{m}
- {
-    \parse_layout:n { #1 }
+% Row variables
+\seq_new:N \g_gex_rseps
+\seq_new:N \g_gex_rdivs
+\seq_new:N \g_gex_rdiv_olens
+
+%
+% PARSE COLUMN OPTIONS
+%
+\cs_new_protected:Npn \gex_parse_col_opts_D:n #1
+{
+    \gex_parse_col_opts:n { #1 }
     \seq_show:N \g_gex_caligns
     \seq_show:N \g_gex_cseps
     \seq_show:N \g_gex_cdivs
     %\bitset_item:Nn \g_gex_cdivs { 3 }
     \seq_show:N \g_gex_cdiv_olens
- }
+}
 
-% Main parsing function
-\cs_new_protected:Npn \parse_layout:n #1
+\cs_new_protected:Npn \gex_parse_col_opts:n #1
 {
     \seq_clear:N \l__parsed_seq
-  \tl_set:Nn \l_tmpa_tl { #1 } % Store the input string in a token list
+    \tl_set:Nn \l_tmpa_tl { #1 } % Store the input string in a token list
 
-  \seq_clear:N \g_gex_caligns
-  \seq_clear:N \g_gex_cseps
-  \seq_clear:N \g_gex_cdivs
-  \seq_clear:N \g_gex_cdiv_olens
+    \seq_clear:N \g_gex_caligns
+    \seq_clear:N \g_gex_cseps
+    \seq_clear:N \g_gex_cdivs
+    \seq_clear:N \g_gex_cdiv_olens
 
-  % Use regex to split the string
-  \regex_extract_all:nVN { [lcr]|\||[SO]\cB\{ \c[^BE].* \cE\} } { \l_tmpa_tl } \l__parsed_seq
-  \seq_show:N \l__parsed_seq
-  \seq_map_inline:Nn \l__parsed_seq
-   {
+    % Use regex to split the string
+    \regex_extract_all:nVN { [lcr]|\||[SO]\cB\{ \c[^BE].* \cE\} } { \l_tmpa_tl } \l__parsed_seq
+    \seq_show:N \l__parsed_seq
+    \seq_map_inline:Nn \l__parsed_seq
+    {
     \tl_if_blank:nF { ##1 }
-     {
-      \parse_token:n { ##1 }
-     }
-   }
- }
+        {
+        \gex_parse_col_token:n { ##1 }
+        }
+    }
+}
+
+\cs_new_protected:Npn \gex_parse_col_token:n #1
+{
+    \str_case:nnF { #1 }
+    {
+        {c}{ 
+            \seq_gput_right:Nn \g_gex_caligns { c }
+            \seq_gput_right:Nn \g_gex_cseps { 0pt }
+            \seq_gput_right:Nn \g_gex_cdiv_olens { }
+            \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
+            }
+        {l}{ 
+            \seq_gput_right:Nn \g_gex_caligns { l }
+            \seq_gput_right:Nn \g_gex_cseps { 0pt }
+            \seq_gput_right:Nn \g_gex_cdiv_olens { }
+            \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
+            }
+        {r}{ 
+            \seq_gput_right:Nn \g_gex_caligns { r }
+            \seq_gput_right:Nn \g_gex_cseps { 0pt }
+            \seq_gput_right:Nn \g_gex_cdiv_olens { }
+            \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
+            }
+        {|}{ 
+            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cdivs { \seq_count:N \g_gex_caligns } { \c_true_bool }
+        }
+    }
+    {
+        \str_case:en { \tl_head:n { #1 } }
+        {
+            {S}{ 
+                \regex_extract_once:nnN { S\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cseps { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            }
+            {O}{
+                \regex_extract_once:nnN { O\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cdiv_olens { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            }
+        }
+    }
+}
+
+%
+% PARSE ROW OPTIONS
+%
+\cs_new_protected:Npn \gex_parse_row_opts_D:n #1
+{
+    \gex_parse_row_opts:n { #1 }
+    \seq_show:N \g_gex_rseps
+    \seq_show:N \g_gex_rdivs
+    \seq_show:N \g_gex_rdiv_olens
+}
+
+\cs_new_protected:Npn \gex_parse_row_opts:n #1
+{
+    \seq_clear:N \l__parsed_seq
+    \tl_set:Nn \l_tmpa_tl { #1 } % Store the input string in a token list
+
+    \int_zero:N \l_tmpa_int
+    \seq_clear:N \g_gex_rseps
+    \seq_clear:N \g_gex_rdivs
+    \seq_clear:N \g_gex_rdiv_olens
+
+    % Use regex to split the string
+    \regex_extract_all:nVN { x|\||[SO]\cB\{ \c[^BE].* \cE\} } { \l_tmpa_tl } \l__parsed_seq
+    \iow_log:n { ROW SEQ: }
+    \seq_show:N \l__parsed_seq
+    \seq_map_inline:Nn \l__parsed_seq
+    {
+        \tl_if_blank:nF { ##1 }
+        {
+            \gex_parse_row_token:n { ##1 }
+        }
+    }
+}
 
 % Function to handle individual tokens
-\cs_new_protected:Npn \parse_token:n #1
- {
-  \str_case:nnF { #1 }
-   {
-    {c}{ 
-        \seq_gput_right:Nn \g_gex_caligns { c }
-        \seq_gput_right:Nn \g_gex_cseps { 0pt }
-        \seq_gput_right:Nn \g_gex_cdiv_olens { }
-        \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
-     }
-    {l}{ 
-        \seq_gput_right:Nn \g_gex_caligns { l }
-        \seq_gput_right:Nn \g_gex_cseps { 0pt }
-        \seq_gput_right:Nn \g_gex_cdiv_olens { }
-        \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
-     }
-    {r}{ 
-        \seq_gput_right:Nn \g_gex_caligns { r }
-        \seq_gput_right:Nn \g_gex_cseps { 0pt }
-        \seq_gput_right:Nn \g_gex_cdiv_olens { }
-        \seq_gput_right:Nn \g_gex_cdivs { \c_false_bool }
-     }
-    {|}{ 
-        \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cdivs { \seq_count:N \g_gex_caligns } { \c_true_bool }
-    }
-   }
-   {
-    \str_case:en { \tl_head:n { #1 } }
+\cs_new_protected:Npn \gex_parse_row_token:n #1
+{
+    \str_case:nnF { #1 }
     {
-        {S}{ 
-            \regex_extract_once:nnN { S\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
-            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cseps { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
-        }
-        {O}{
-            \regex_extract_once:nnN { O\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
-            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_cdiv_olens { \seq_count:N \g_gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+        {x}{ 
+            \int_incr:N \l_tmpa_int
+            \seq_gput_right:Nn \g_gex_rseps { 0pt }
+            \seq_gput_right:Nn \g_gex_rdiv_olens { }
+            \seq_gput_right:Nn \g_gex_rdivs { \c_false_bool }
+            }
+        {|}{ 
+            \exp_args:NNnx \seq_gset_item:Nnn \g_gex_rdivs { \int_use:N \l_tmpa_int } { \c_true_bool }
         }
     }
-   }
- }
+    {
+        \str_case:en { \tl_head:n { #1 } }
+        {
+            {S}{ 
+                \regex_extract_once:nnN { S\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                \exp_args:NNnx \seq_gset_item:Nnn \g_gex_rseps { \int_use:N \l_tmpa_int } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            }
+            {O}{
+                \regex_extract_once:nnN { O\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                \exp_args:NNnx \seq_gset_item:Nnn \g_gex_rdiv_olens { \int_use:N \l_tmpa_int } { \seq_item:Nn \l_tmpa_seq { 2 } }
+            }
+        }
+    }
+}
 \ExplSyntaxOff
 
 \makeatletter
@@ -273,6 +360,7 @@
     \gex@buildcbox%
 }%
 
+\ExplSyntaxOn
 %
 % NEW gexmatrix ENVIRONMENT
 %
@@ -282,7 +370,10 @@
     %
     % PARSE ARGUMENTS in expl3
     %
-    \ggexparsearraylayout{#1}%
+    \keys_set:nn { gex } { #1 }
+    %\exp_args:Ne \iow_log:n { KEYSET:~\l_gex_row_opts }
+    \exp_args:Ne \gex_parse_col_opts_D:n { \l_gex_col_opts }
+    \exp_args:Ne \gex_parse_row_opts_D:n { \l_gex_row_opts }
     \begin{gex@matrix}%
 }{%
     \end{gex@matrix}%
@@ -328,7 +419,6 @@
 
 \newcount\g@iacol
 
-\ExplSyntaxOn
 \def\g@extraspace{%
     %\texttt{\the\g@iacol}
     %\seq_item:Nn \g_gex_cseps { \g@iacol }
@@ -381,7 +471,7 @@
 \begin{document}
 
 \begin{align*}
-    A=\begin{gexmatrix}[cS{10pt}|ccS{10pt}|rr]
+    A=\begin{gexmatrix}[cols=cS{10pt}|cc|rr, rows=xxx|xx]
         4 & 3 & 5 & 1 & 0 \\ 
         5 & 3 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
@@ -392,6 +482,12 @@
         \colops
         \add[2]{1}{3}
         \add[-3]{0}{2}
+    \end{gexmatrix}
+\end{align*}
+\begin{align*}
+    A=\begin{gexmatrix}[cols=cccS{10pt}|r, rows=xxxxx]
+        4 & 3 & 5 & 1 \\ 
+        5 & 3 & 5 & 0
     \end{gexmatrix}
 \end{align*}
 
