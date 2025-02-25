@@ -215,6 +215,32 @@
 }
 
 %
+% NEW @measureRows
+%
+\def\g@measureRows{%
+    \setbox\g@trash\lastbox
+    \ifnum\g@maxrow<0% base case: this box is not part of the matrix
+    \else 
+        \ifdim\ht\g@trash=0pt%
+            \advance\g@d@tmp\lastskip\unskip
+            \advance\g@d@tmp\lastkern\unkern
+            \unpenalty
+        \else
+            \g@defdim{rb\the\g@maxrow}{\g@d@tmp}%
+            \advance\g@d@tmp\dp\g@trash
+            \advance\g@d@tmp\g@axisHeight
+            \g@defdim{ry\the\g@maxrow}{\g@d@tmp}%
+            \g@defdim{rx\the\g@maxrow}{\z@}%
+            \advance\g@d@tmp-\g@axisHeight
+            \advance\g@d@tmp\ht\g@trash
+            \g@defdim{rt\the\g@maxrow}{\g@d@tmp}%
+            \advance\g@maxrow-1%
+        \fi
+        \g@measureRows
+    \fi
+}
+
+%
 % NEW @measureCols and @measureColsSucc
 %
 \ExplSyntaxOn
@@ -306,6 +332,23 @@
                 \bool_show:N \l_tmpa_bool
                 \if_bool:N \l_tmpa_bool
                     \put(\g@double{cm\int_use:N \l_tmpa_int},0){\line(0,1){\g@double{h}}}
+                \fi:
+                \int_incr:N \l_tmpa_int
+            }
+            \int_zero:N \l_tmpa_int
+            \seq_map_inline:Nn \g_gex_rdivs 
+            {
+                \bool_set:Nn \l_tmpa_bool { ##1 }
+                \exp_args:Ne \iow_log:n { RdivIndex:~\int_use:N \l_tmpa_int }
+                \exp_args:Ne \iow_log:n { RdivYpos:~\g@double{ry\int_use:N \l_tmpa_int}}
+                \bool_show:N \l_tmpa_bool
+                \if_bool:N \l_tmpa_bool
+                    \fp_set:Nn \l_tmpa_fp { \g@double{rb\int_use:N \l_tmpa_int} }
+                    \int_incr:N \l_tmpa_int
+                    \fp_set:Nn \l_tmpb_fp { \g@double{rt\int_use:N \l_tmpa_int} }
+                    \int_decr:N \l_tmpa_int
+                    \fp_set:Nn \l_tmpa_fp { 0.5 * (\l_tmpa_fp - \l_tmpb_fp) + \l_tmpb_fp}
+                    \put(0,\fp_use:N \l_tmpa_fp){\line(1,0){\g@double{w}}}
                 \fi:
                 \int_incr:N \l_tmpa_int
             }
@@ -425,7 +468,6 @@
     \exp_args:Ne \skip_horizontal:n { \exp_args:NNe \seq_item:Nn \g_gex_cseps { \g@iacol } }
     \global\advance\g@iacol by 1%
 }
-\ExplSyntaxOff
 
 \edef\g@prae{\hfil\noexpand\mathstrut$\relax}
 \edef\g@post{\relax$\hfil} 
@@ -465,13 +507,14 @@
   \global\let\rowops\g@east
   \global\let\colops\g@north
 }
+\ExplSyntaxOff
 
 \makeatother
 
 \begin{document}
 
 \begin{align*}
-    A=\begin{gexmatrix}[cols=cS{10pt}|cc|rr, rows=xxx|xx]
+    A=\begin{gexmatrix}[cols=ccc|cc, rows=xx|xxx]
         4 & 3 & 5 & 1 & 0 \\ 
         5 & 3 & 5 & 0 & -1 \\
         1 & 0 & 0 & \\
@@ -485,7 +528,7 @@
     \end{gexmatrix}
 \end{align*}
 \begin{align*}
-    A=\begin{gexmatrix}[cols=cccS{10pt}|r, rows=xxxxx]
+    A=\begin{gexmatrix}[cols=cccS{10pt}|r]
         4 & 3 & 5 & 1 \\ 
         5 & 3 & 5 & 0
     \end{gexmatrix}
