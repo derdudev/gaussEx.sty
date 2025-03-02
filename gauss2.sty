@@ -1054,7 +1054,7 @@
 %    \begin{macrocode}
 \def\g@measureColsSucc{%
  \ifnum \g@c@tmp<0\else
-  \g@c@tmpa=\g@maxcol
+  \g@c@tmpa=\g@maxcol 
   \advance\g@c@tmpa-\g@c@tmp
   \advance\g@c@tmpa-1
   \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
@@ -1247,8 +1247,8 @@
 %    \begin{macrocode}
 \def\g@rbox#1#2#3{%
  \setbox\g@label=\hbox{$\relax#3\relax$}%
- \ht\g@label\z@\dp\g@label\z@
- \setbox\g@label=\hbox{$\mathstrut\box\g@label$}%  
+ \ht\g@label\z@\dp\g@label\z@ % set height and depth to 0 so that the actual label does not play any role for the alignment
+ \setbox\g@label=\hbox{$\mathstrut\box\g@label$}% mathematical symbols get centered around the math axis. To make the math axis the center of the hbox, insert a \mathstrut (See TikZ visualization: depth-visualization.tex)
  \put(\g@double{#1},\g@double{#2})%
  {\makebox(0,0)[l]{\kern-\p@\copy\g@label}}%
 }
@@ -1400,7 +1400,7 @@
 %
 %    \begin{macrocode}
 \def\g@north@arrow#1#2#3#4{%
- \@ifnextchar[%
+ \@ifnextchar[% this is a LaTeX macro, similar to \@ifstar
  {\g@north@arrow@a{#1}{#2}{#3}{#4}}%
  {\g@north@arrow@b{#1}{#2}{#3}{#4}{}[]}%
 }
@@ -1623,44 +1623,52 @@
       \g@defdouble{tmp1}{\g@double{rx#7}}%
       \g@defdouble{tmp2}{\g@double{rx#8}}%
       \ifx0#1
+        % use no arrow at start
        \g@advance{rx#7}{\the\rowopminsize}%
       \else
+        % use an arrow at start
        \g@advance{rx#7}{\the\g@arrowwd}%
       \fi
       \ifx0#2
+        % use no arrow at end
        \g@advance{rx#8}{\the\rowopminsize}%
       \else
+        % use arrow at end
        \g@advance{rx#8}{\the\g@arrowwd}%
       \fi
-      \g@measureArea{rx}{#7}{#8}{sum}%
+      \g@measureArea{rx}{#7}{#8}{sum}% set sum = max_{i in {#7,...,#8}} rx<i>
       \ifx0#1
-       \g@hline{tmp1}{ry#7}{sum}%
+       \g@hline{tmp1}{ry#7}{sum}% draw line without arrow at the start
       \else
-       \g@harrow{tmp1}{ry#7}{sum}%
+       \g@harrow{tmp1}{ry#7}{sum}% draw arrow and no line at the start
       \fi
       \ifx0#2
-       \g@hline{tmp2}{ry#8}{sum}%
+       \g@hline{tmp2}{ry#8}{sum}% draw line without arrow at the end
       \else
-       \g@harrow{tmp2}{ry#8}{sum}%
+       \g@harrow{tmp2}{ry#8}{sum}% draw line without arrow at the start
       \fi
-      \g@vline{sum}{ry#7}{ry#8}%
-      \setbox\g@b@tmpa=\hbox{$#3{#5}$}%
-      \setbox\g@b@tmpb=\hbox{$#4{#6}$}%
-      \ifdim\wd\g@b@tmpa>\z@
+      \g@vline{sum}{ry#7}{ry#8}% draw vertical line from #7 to #8
+      \setbox\g@b@tmpa=\hbox{$#3{#5}$}% #3 = label at start, #5 = label text
+      \setbox\g@b@tmpb=\hbox{$#4{#6}$}% #4 = label at end, #6 = label text (for \add, #4 is \rowaddtolabel, this just ignores the argument; \swapp uses \rowswapptolabel which also ignores the argument)
+      \ifdim\wd\g@b@tmpa>\z@ % if there actually is a label at the start (this is not the case for the default settings with \swapp and \rowswappto/fromlabel)
        \g@advance{sum}{\the\labelskip}%
       \else
        \ifdim\wd\g@b@tmpb>\z@
-        \g@advance{sum}{\the\labelskip}%
+       % in case there already is a label at the start, there was already labelskip inserted and no more space needs to be added here
+        \g@advance{sum}{\the\labelskip}% if there actually is a label at the start (this is not the case for the default settings with \swapp and \rowswappto/fromlabel)
        \fi 
       \fi 
       \g@d@tmpc\z@
       \ifdim\wd\g@b@tmpa>\z@
+      % if there was a start label, place the label using rbox
        \g@rbox{sum}{ry#7}{\kern-\p@\vcenter{\box\g@b@tmpa}}%
        \g@d@tmpc=\wd\g@label
       \fi
       \ifdim\wd\g@b@tmpb>\z@
+      % if there was an end label, place the label using rbox
        \g@rbox{sum}{ry#8}{\kern-\p@\vcenter{\box\g@b@tmpb}}%
        \ifdim \wd\g@label>\g@d@tmpc
+       % if the width of this new (second) label is larger than the first one
         \g@d@tmpc=\wd\g@label
        \fi
       \fi

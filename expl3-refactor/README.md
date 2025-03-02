@@ -1,0 +1,1 @@
+This folder contains information about the refactoring of the gauss package to the expl3 programming layer. 

@@ -1,0 +1,13 @@
+\documentclass{article}
+
+% SYNOPSIS: There does not seem to be a way to implement rounded ends of a line with the few native commands of the picture environment. With TikZ this surely works, but loading TikZ only for this minor imperfectness seems a little overkill. Maybe leave it as a global Package option if that is possible?
+
+\begin{document}
+\setlength{\unitlength}{1mm}
+\begin{picture}(20,10)
+    \linethickness{0.5mm}
+    \put(0,0){\line(1,0){4}} % Straight line
+    \put(0,0){\circle*{0.51}} % Rounded start
+    \put(4,0){\circle*{0.5}} % Rounded end
+\end{picture}
+\end{document}

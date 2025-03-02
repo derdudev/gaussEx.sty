@@ -1,0 +1,17 @@
+\documentclass{article}
+
+\makeatletter
+\newbox\test
+\setbox\test=\hbox{$\frac{1}{2}=\displaystyle\sum_{i=1}^n$}%
+\ht\test\z@ 
+\dp\test\z@
+\makeatother
+
+\begin{document}
+\setlength{\unitlength}{1mm}
+\begin{picture}(20,10)
+    \linethickness{0.1mm}
+    \put(0,0){\line(1,0){4}}
+    \put(4,0){\makebox(0,0)[l]{Hallo $\frac{1111111}{222222}=\displaystyle\sum_{i=1}^n$}}
+\end{picture}
+\end{document}

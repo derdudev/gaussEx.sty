@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{tikz}
+\begin{document}
+
+\vspace{1cm}
+
+% Visualize the math axis
+\newbox\mathbox
+\setbox\mathbox=\hbox{Hallo $\frac{11111}{22222}=$} % Store the math content in a box
+
+% Calculate the math axis position
+\newdimen\mathaxis
+\mathaxis=\fontdimen22\textfont2 % Math axis is defined by the font
+
+\begin{tikzpicture}
+    % Place the math box
+    \node[anchor=base] (box) {\copy\mathbox};
+
+    % Draw the bounding box
+    \draw[red] (box.north west) rectangle (box.south east);
+
+    % Draw the baseline
+    \draw[blue, dashed] (box.base west) -- (box.base east) node[midway, below] {Baseline};
+
+    % Draw the math axis
+    \draw[purple] ([yshift=\mathaxis]box.base west) -- 
+                         ([yshift=\mathaxis]box.base east)
+        node[right] {Math Axis};
+
+    % Visualize height, depth, and width
+    \draw[|-|,green] (box.north west) -- (box.base west) node[midway, left] {Height};
+    \draw[|-|,green] (box.base west) -- (box.south west) node[midway, left] {Depth};
+    \draw[|-|,green] (box.north west) -- (box.north east) node[midway, above] {Width};
+\end{tikzpicture}
+
+\end{document}
