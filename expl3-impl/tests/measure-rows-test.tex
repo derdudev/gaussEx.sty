@@ -18,11 +18,11 @@
         \dim_set:Nn \g__gex_tmp_dim { \c_zero_dim }
         \int_set:Nn \g__gex_maxrow { 1 }
         \__gex_measure_axis:
-        \__gex_measure_rows:
+        { \__gex_measure_rows: }
         \seq_log:N \g__gex_ry
         \hbox{%
             \box_use:N \g__gex_matrixbox
-            \rule{.5pt}{14.5pt}
+            \box_move_down:nn { \box_dp:N \g__gex_matrixbox } { \hbox:n{\rule{.5pt}{\seq_item:Nn \g__gex_ry { 1 }}} }
         }
     }
     

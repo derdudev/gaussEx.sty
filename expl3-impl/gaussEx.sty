@@ -120,9 +120,11 @@
 \seq_new:N \g__gex_rt
 \cs_new:Npn \__gex_measure_rows: {
     \box_set_to_last:N \g__gex_trash
+    \box_log:N \g__gex_trash
     \int_compare:nNnTF { \g__gex_maxrow } < { 0 } {} {
         \dim_compare:nNnTF { \box_ht:N \g__gex_trash } = { 0pt } {
             \dim_add:Nn \g__gex_tmp_dim { \lastskip }
+            \dim_log:N \g__gex_tmp_dim
             \unskip
             \dim_add:Nn \g__gex_tmp_dim { \lastkern }
             \unkern
@@ -140,6 +142,10 @@
         }
         \__gex_measure_rows:
     }
+}
+
+\cs_new:Npn \__gex_measure_cols: {
+    \box_set_to_last:N \g__gex_trash
 }
 
 
