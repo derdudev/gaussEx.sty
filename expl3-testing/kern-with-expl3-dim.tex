@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage{expl3}
+
+\begin{document}
+\ExplSyntaxOn
+
+% Define a global dimension variable and set its value
+\dim_new:N \g__gex_tmpc_dim
+\dim_set:Nn \g__gex_tmpc_dim {10pt}
+
+% Insert some text with a kern
+Some\kern\dim_eval:n{\g__gex_tmpc_dim}text.
+
+\ExplSyntaxOff
+\end{document}

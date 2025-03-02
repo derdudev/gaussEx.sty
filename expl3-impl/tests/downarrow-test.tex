@@ -1,0 +1,17 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\ExplSyntaxOn
+\vbox_set:Nn \g__gex_trash { \__gex_vertline: }
+\dim_set:Nn \g__gex_arrowht { \box_ht:N \g__gex_trash }
+\dim_add:Nn \g__gex_arrowht { \box_dp:N \g__gex_trash }
+
+\NewDocumentCommand{\gexdownarrow}{m}{
+    \__gex_downarrow:n { #1 }
+}
+\ExplSyntaxOff
+
+\begin{document}
+\gexdownarrow{2cm}
+\end{document}
