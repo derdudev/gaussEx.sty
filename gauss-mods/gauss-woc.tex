@@ -1,0 +1,750 @@
+%
+% The gauss.sty without the documentation comments, only my own
+%
+\ProvidesPackage{gauss}[2003/01/14]
+\RequirePackage{amsmath}
+\makeatletter
+
+%
+% DEFINITIONS
+%
+% Boxes
+\newbox\g@trash
+\newbox\g@matrixbox
+\newbox\g@eastbox
+\newbox\g@northbox
+\newbox\g@label
+\newbox\g@b@tmp
+\newbox\g@b@tmpa
+\newbox\g@b@tmpb
+%
+% Counters
+%
+\newcount\g@maxrow 
+\newcount\g@maxcol
+\newcount\g@maxrow@old
+\newcount\g@maxcol@old
+\newcount\g@c@tmp
+\newcount\g@c@tmpa
+%
+% Dimensions
+%
+\newdimen\g@axisHeight
+\newdimen\g@linethickness
+\newdimen\g@tab
+\newdimen\g@arrowht
+\newdimen\g@arrowwd
+\newdimen\g@d@tmp
+\newdimen\g@d@tmpa
+\newdimen\g@d@tmpb
+\newdimen\g@d@tmpc
+\newdimen\g@d@tmpd
+\newdimen\g@d@tmpe
+
+%
+% CONTROL STRUCTURES
+%
+% For-loop
+\def\g@loopContent#1{}
+\newcount\g@loopCount\g@loopCount=0
+\newcount\g@loopEnd\g@loopEnd=1
+\newcount\g@loopStep\g@loopStep=1
+
+\def\g@loop{%
+    % base case?
+    \ifnum\g@loopCount=\g@loopEnd\else
+        % no: execute loop body
+        {\expandafter\g@loopContent\expandafter{\the\g@loopCount}}%
+        % increment or decrement the loop variable
+        \advance\g@loopCount\g@loopStep
+        % call \g@loop recursivly.
+        \g@loop
+    \fi
+}
+
+\def\g@for#1\to#2\do#3{%
+    \def\g@loopContent##1{#3}%
+    \g@loopCount=#1
+    \g@loopEnd=#2
+    \ifnum\g@loopEnd>\g@loopCount%
+        \g@loopStep=1
+    \else%
+        \g@loopStep=-1
+    \fi
+    \advance\g@loopEnd\g@loopStep % inclusive upper bound
+    \g@loop
+}
+
+% Bounds check
+\newif\ifg@indexCorrect
+\def\g@checkBounds#1#2#3#4{%
+    \g@indexCorrectfalse
+    \ifnum#2>#3%
+        \PackageError{gauss}{\g@shorterror{#1} #3<#2}{\g@longerror{#1}}
+    \else
+        \ifnum#3>#4%
+            \PackageError{gauss}{\g@shorterror{#1} #3>#4}{\g@longerror{#1}}
+        \else
+            \g@indexCorrecttrue
+        \fi
+    \fi
+}
+
+\def\g@shorterror#1{\ifx r#1 Row \else Column \fi index out of bounds: }
+\def\g@longerror#1{%
+    An index of an operation points to a \ifx r#1 row \else column \fi %
+    that does not exist.\MessageBreak
+    Note that the index of the %
+    \ifx r#1 bottom row \else leftmost column \fi is 0 while the index of the %
+    \ifx r#1 top row \else rightmost column \fi is <number of %
+    \ifx r#1 rows\else columns\fi - 1> .%
+}
+
+%
+% ARROW FUNCTIONS
+%
+\DeclareMathSymbol{\g@downarrowSymb}{\mathord}{largesymbols}{`\y}
+\DeclareMathSymbol{\g@vertlineSymb}{\mathord}{largesymbols}{`\?}
+\def\g@vertline{\hbox{$\g@vertlineSymb$}\kern-\lineskip}%
+
+\def\g@downarrow#1{\vbox{%
+    \vfill
+    \baselineskip\z@\relax
+    \g@d@tmpc=#1\relax
+    \ifdim \g@d@tmpc<\g@arrowht
+        \g@d@tmpc\g@arrowht\relax
+    \fi
+    \g@vlineRec
+    \kern\g@d@tmpc 
+    \setbox\g@trash=\hbox{$\g@downarrowSymb$}%
+    \hbox{\raise\dp\g@trash\box\g@trash}%
+}}
+\def\g@vlineRec{%
+    \advance\g@d@tmpc-\g@arrowht
+    \ifdim \g@d@tmpc<\z@ \else
+        \g@vertline
+        \g@vlineRec
+    \fi
+}
+
+%
+% FLOATS AND DIMENSIONS
+%
+% Remove 'pt' macro
+\edef\redo#1{\catcode`p=#1\catcode`t=#1\relax}
+\redo{12}
+\def\g@del#1pt{#1}
+\redo{11}
+
+\def\g@defdim#1#2{%
+    \edef\g@defdim@arg{\the #2}%
+    \edef\g@defdim@arg{\expandafter\g@del\g@defdim@arg}%
+    \g@defdouble{#1}{\g@defdim@arg}%
+}
+
+\def\g@defdouble#1#2{%
+    \expandafter\expandafter\expandafter\global
+    \expandafter\edef\csname g@@#1 \endcsname{#2}%
+}
+
+\def\g@dim#1#2{%
+    \edef\g@dim@arg{\g@double{#1}}%
+    #2=\g@dim@arg\p@\relax
+}
+
+\def\g@double#1{%
+    \csname g@@#1 \endcsname
+}
+
+%
+% GFLOAT CALCULUS
+% 
+\def\g@advance#1#2{%
+    \g@dim{#1}{\g@d@tmpa}% f_1 := #1
+    \expandafter\ifx\csname g@@#2 \endcsname\relax
+        \g@d@tmpb=#2% f_2 := #2 (TeX dimension)
+    \else
+        \g@dim{#2}{\g@d@tmpb}% f_2 := #2 (float)
+    \fi
+    \advance\g@d@tmpa\g@d@tmpb\relax% f_1 += f_2
+    \g@defdim{#1}{\g@d@tmpa}% #1 := f_1
+}
+
+\def\g@min#1#2#3{%
+    \g@dim{#1}{\g@d@tmpa}% f_1 := #1
+    \g@dim{#2}{\g@d@tmpb}% f_2 := #2
+    \ifdim \g@d@tmpa<\g@d@tmpb
+        #3=\g@d@tmpa
+    \else
+        #3=\g@d@tmpb
+    \fi
+    \relax
+}
+
+\def\g@minD#1#2#3{%
+    \g@min{#1}{#2}{\g@d@tmpc}%
+    \edef\g@minD@arg{\the\g@d@tmpc}%
+    \edef\g@minD@arg{\expandafter\g@del\g@minD@arg}%
+    \edef#3{\g@minD@arg}%
+}
+
+\def\g@max#1#2#3{%
+    \g@dim{#1}{\g@d@tmpa}% 
+    \g@dim{#2}{\g@d@tmpb}% 
+    \ifdim \g@d@tmpa<\g@d@tmpb
+        #3=\g@d@tmpb
+    \else
+        #3=\g@d@tmpa
+    \fi
+    \relax
+}
+\def\g@maxD#1#2#3{%
+    \g@max{#1}{#2}{\g@d@tmpc}%
+    \edef\g@maxD@arg{\the\g@d@tmpc}%
+    \edef\g@maxD@arg{\expandafter\g@del\g@maxD@arg}%
+    \edef#3{\g@maxD@arg}%
+}
+
+\def\g@dist#1#2#3{%
+    \g@dim{#1}{\g@d@tmpa}% f_1 := #1
+    \g@dim{#2}{\g@d@tmpb}% f_2 := #2
+    \ifdim \g@d@tmpa<\g@d@tmpb
+        #3=\g@d@tmpb
+        \advance#3 by-\g@d@tmpa
+    \else
+        #3=\g@d@tmpa
+        \advance#3 by-\g@d@tmpb
+    \fi
+    \relax
+}
+
+\def\g@distD#1#2#3{%
+    \g@dist{#1}{#2}{\g@d@tmpc}%
+    \edef\g@distD@arg{\the\g@d@tmpc}%
+    \edef\g@distD@arg{\expandafter\g@del\g@distD@arg}%
+    \edef#3{\g@distD@arg}%
+}
+
+\def\g@update#1#2{%
+    \g@dim{#2}{\g@d@tmpe}
+    \g@dim{#1}{\g@d@tmpb}
+    \ifdim \g@d@tmpe>\g@d@tmpb
+        \g@defdim{#1}{\g@d@tmpe}%
+    \fi
+}
+
+\def\g@updateArea#1#2#3#4{\g@for#3\to#4\do{\g@update{#2##1}{#1}}}
+
+%
+% MACROS FOR MEASUREMENT
+%
+\def\g@measureRows{%
+    \setbox\g@trash\lastbox
+    \ifnum\g@maxrow<0% base case: this box is not part of the matrix
+    \else 
+        \ifdim\ht\g@trash=0pt%
+            \advance\g@d@tmp\lastskip\unskip
+            \advance\g@d@tmp\lastkern\unkern
+            \unpenalty
+        \else
+            \advance\g@d@tmp\dp\g@trash
+            \g@defdim{rb\the\g@maxrow}{\g@d@tmp}%
+            \advance\g@d@tmp\g@axisHeight
+            \g@defdim{ry\the\g@maxrow}{\g@d@tmp}%
+            \g@defdim{rx\the\g@maxrow}{\z@}%
+            \advance\g@d@tmp-\g@axisHeight
+            \advance\g@d@tmp\ht\g@trash
+            \g@defdim{rt\the\g@maxrow}{\g@d@tmp}%
+            \advance\g@maxrow-1%
+        \fi
+        \g@measureRows
+    \fi
+}
+
+\def\g@measureCols{%
+    \setbox\g@trash\lastbox
+    \ifdim \wd\g@trash=100cm%
+        % base case. Invert the ordering and sum the dimensions.
+        \g@defdouble{ct\the\g@maxcol}{0}%
+        \g@defdouble{cy\the\g@maxcol}{0}%
+        \global\g@maxcol\g@maxcol
+        \g@c@tmp\g@maxcol
+        \advance\g@c@tmp-1%
+        \g@measureColsSucc
+        \global\advance\g@maxcol-1%
+    \else
+        \ifdim \ht\g@trash=0pt%
+            \advance\g@d@tmp\lastskip\unskip
+            %\wlog{\the\lastkern}
+            \advance\g@d@tmp\lastkern\unkern
+            \unpenalty
+        \else
+            % use ct temporaryly to store the skip between
+            % colnr + 1 and colnr.
+            \g@defdim{ct\the\g@maxcol}{\g@d@tmp}%
+            \g@d@tmp\z@
+            % use cy temporaryly to store the cell's width.
+            \g@defdim{cy\the\g@maxcol}{\wd\g@trash}%
+            \advance\g@maxcol1%
+        \fi
+        \g@measureCols
+    \fi
+}
+
+\def\g@measureColsSucc{%
+    \ifnum \g@c@tmp<0\else
+        \g@c@tmpa=\g@maxcol 
+        \advance\g@c@tmpa-\g@c@tmp
+        \advance\g@c@tmpa-1
+        \g@dim{cy\the\g@c@tmp}{\g@d@tmpa}% width of this cell
+        \g@dim{ct\the\g@c@tmp}{\g@d@tmpb}% glue right to this cell
+        \g@defdim{cm\the\g@c@tmpa}{\g@d@tmp}%
+        \advance\g@d@tmp.5\g@d@tmpa%
+        \g@defdouble{cy\the\g@c@tmp}{0}%
+        \g@defdim{cx\the\g@c@tmpa}{\g@d@tmp}%
+        \advance\g@d@tmp.5\g@d@tmpa
+        \advance\g@d@tmp\g@d@tmpb
+        \ifnum \g@c@tmpa=0%
+            \advance\g@d@tmp.5\g@tab
+        \fi
+        \advance\g@c@tmp-1
+        \g@measureColsSucc
+    \fi
+}
+
+\def\g@measureAxis{%
+    % 1. Where is the math axis relative to the ground line?
+    \setbox\g@trash=\hbox{$\vcenter{\hbox to 5pt{}}$}% use \fontdimen22\textfont2?
+    \global\g@axisHeight=\ht\g@trash
+    % 2. What is the minimum width of a horizontal arrow?
+    \setbox\g@trash=\hbox{$\leftarrow$}%
+    \global\g@arrowwd\wd\g@trash
+    % 3. What is the minimum height of a vertical arrow?
+    \setbox\g@trash=\vbox{\g@vertline}%
+    \global\g@arrowht=\ht\g@trash
+    \global\advance\g@arrowht\dp\g@trash
+    \global\advance\g@arrowht\lineskip
+    % 4. What should be the thickness of ordinary lines?
+    \global\g@linethickness=\fboxrule\relax
+}
+
+\def\g@measureArea#1#2#3#4{%
+    \g@defdim{#4}{\z@}%
+    \g@for#2\to#3\do{%
+        \g@max{#1##1}{#4}{\g@d@tmpe}%
+        \g@defdim{#4}{\g@d@tmpe}%
+    }%
+}
+
+%
+% MACROS FOR DRAWING PURPOSES
+%
+% Lines and arrows
+\def\g@vline#1#2#3{%
+    \g@minD{#2}{#3}{\min}
+    \g@distD{#2}{#3}{\dist}
+    \put(\g@double{#1},\min){\line(0,1){\dist}}
+}
+
+\def\g@vvline#1#2#3{%
+    \put(\g@double{#1},\g@double{#2}){\line(0,1){\g@double{#3}}}
+}
+
+\def\g@varrow#1#2#3{%
+    \g@dim{#2}{\g@d@tmpa}%
+    \g@dim{#3}{\g@d@tmpb}%
+    \advance\g@d@tmpb-\g@d@tmpa
+    \g@cbox{#1}{#2}{\g@downarrow{\g@d@tmpb}}%
+}
+
+\def\g@hline#1#2#3{%
+    \g@minD{#1}{#3}{\min}%
+    \g@distD{#1}{#3}{\dist}%
+    \put(\min,\g@double{#2}){\line(1,0){\dist}}%
+}
+
+\def\g@hhline#1#2#3{%
+    \put(\g@double{#1},\g@double{#2}){\line(1,0){\g@double{#3}}}%
+}
+
+\def\g@harrow#1#2#3{%
+    \g@dim{#1}{\g@d@tmpa}%
+    \g@dim{#3}{\g@d@tmpb}%
+    \advance\g@d@tmpb-\g@d@tmpa
+    \advance\g@d@tmpb2\p@
+    \g@rbox{#1}{#2}{\hbox to\g@d@tmpb{\leftarrowfill}}%
+}
+
+% Boxes
+\def\g@rbox#1#2#3{%
+    \setbox\g@label=\hbox{$\relax#3\relax$}%
+    \ht\g@label\z@\dp\g@label\z@ % set height and depth to 0 so that the actual label does not play any role for the alignment
+    \setbox\g@label=\hbox{$\mathstrut\box\g@label$}% mathematical symbols get centered around the math axis. To make the math axis the center of the hbox, insert a \mathstrut (See TikZ visualization: depth-visualization.tex)
+    \put(\g@double{#1},\g@double{#2}){\makebox(0,0)[l]{\kern-\p@\copy\g@label}}%
+}
+
+\def\g@cbox#1#2#3{%
+    \setbox\g@label=\hbox{$\relax#3\relax$}%
+    \setbox\g@label=\hbox{\raise\dp\g@label\box\g@label}% the raise by the depth is probably needed because the makebox aligns at the baseline and not the true bottom. => Not the case!
+    \put(\g@double{#1},\g@double{#2}){\makebox(0,0)[b]{\copy\g@label}}%
+}
+
+%
+% COMMANDS FOR THE MATRIX OPERATIONS
+%
+\def\g@north{%
+    \g@endregion
+    \gdef\colops{\PackageError{gauss}{Two sets of column operations are specified in just one matrix. This is not allowed.}}%
+    \gdef\g@endregion{%
+        \end{picture}\egroup
+        \g@measureArea{cy}{0}{\the\g@maxcol}{sum}%
+        \g@dim{sum}{\ht\g@northbox}%
+        \global\setbox\g@northbox=\hbox{%
+        \raise\colarrowsep\box\g@northbox}%
+    }%
+    \def\swap{\g@north@arrow11\colswapfromlabel\colswaptolabel}%
+    \def\add{\g@north@arrow01\coladdfromlabel\coladdtolabel}%
+    \let\mult\g@north@mult
+    \g@defdim{sum}{\z@}%
+    \global\setbox\g@northbox=\hbox\bgroup
+    \begin{picture}(\g@double{w},0)(0,0)
+        \linethickness{\g@linethickness}%
+}
+\def\g@north@mult#1#2{%
+    \ifx *#1
+        \g@for0\to\g@maxcol\do{\g@north@mult{##1}{#2}}%
+    \else
+        \g@checkBounds{c}{0}{#1}{\the\g@maxcol}%
+        \ifg@indexCorrect
+            \g@cbox{cx#1}{cy#1}{\colmultlabel{#2}}%
+            \g@dim{cy#1}{\g@d@tmpc}%
+            \advance\g@d@tmpc\ht\g@label
+            \g@defdim{cy#1}{\g@d@tmpc}%
+            \g@advance{cy#1}{\the\opskip}%
+            \g@update{sum}{cx#1}%
+        \fi
+    \fi
+}
+\def\g@north@arrow@b#1#2#3#4#5[#6]#7#8{%
+    \ifx *#7
+        \ifx *#8
+            \g@for0\to\g@maxcol\do{%
+            \g@north@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{*}}%
+        \else
+            \g@for#8\to0\do{%
+            \g@north@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{#8}}%
+            \g@for#8\to\g@maxcol\do{%
+            \g@north@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{#8}}%
+        \fi
+    \else
+        \ifx *#8
+            \g@for#7\to0\do{%
+            \g@north@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{#7}{##1}}%
+            \g@for#7\to\g@maxcol\do{%
+            \g@north@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{#7}{##1}}%
+        \else
+            \ifnum #7=#8\else
+                \g@checkBounds{c}{0}{#7}{\the\g@maxcol}%
+                \ifg@indexCorrect
+                    \g@checkBounds{c}{0}{#8}{\the\g@maxcol}%
+                    \ifg@indexCorrect
+                        \g@defdouble{tmp1}{\g@double{cy#7}}%
+                        \g@defdouble{tmp2}{\g@double{cy#8}}%
+                        \ifx0#1
+                            \g@advance{cy#7}{\the\colopminsize}%
+                        \else
+                            \g@advance{cy#7}{\the\g@arrowht}%
+                        \fi
+                        \ifx0#2
+                            \g@advance{cy#8}{\the\colopminsize}%
+                        \else
+                            \g@advance{cy#8}{\the\g@arrowht}%
+                        \fi      
+                        \g@measureArea{cy}{#7}{#8}{sum}%
+                        \ifx0#1
+                            \g@vline{cx#7}{tmp1}{sum}%
+                        \else
+                            \g@varrow{cx#7}{tmp1}{sum}%
+                        \fi
+                        \ifx0#2
+                            \g@vline{cx#8}{tmp2}{sum}%
+                        \else
+                            \g@varrow{cx#8}{tmp2}{sum}%
+                        \fi
+                        \g@hline{cx#7}{sum}{cx#8}%
+                        \setbox\g@b@tmpa=\hbox{$#3{#5}$}%
+                        \setbox\g@b@tmpb=\hbox{$#4{#6}$}%
+                        \ifdim\ht\g@b@tmpa>\z@
+                            \g@advance{sum}{\the\labelskip}%
+                        \else
+                            \ifdim\ht\g@b@tmpb>\z@
+                                \g@advance{sum}{\the\labelskip}%
+                            \fi
+                        \fi
+                        \g@d@tmpc\z@
+                        \ifdim\ht\g@b@tmpa>\z@
+                            \g@cbox{cx#7}{sum}{\kern-\p@\vcenter{\box\g@b@tmpa}}%
+                            \g@d@tmpc=\ht\g@label
+                        \fi
+                        \ifdim\ht\g@b@tmpb>\z@
+                            \g@cbox{cx#8}{sum}{\kern-\p@\vcenter{\box\g@b@tmpb}}%
+                            \ifdim \ht\g@label>\g@d@tmpc
+                                \g@d@tmpc=\ht\g@label
+                            \fi
+                        \fi
+                        \g@advance{sum}{\the\g@d@tmpc}%
+                        \g@advance{sum}{\the\opskip}%
+                        \g@updateArea{sum}{cy}{#7}{#8}%
+                    \fi
+                \fi
+            \fi
+        \fi
+    \fi
+}
+
+\def\g@east{%
+    \g@endregion 
+    \def\swap{\g@east@arrow11\rowswapfromlabel\rowswaptolabel}
+    \def\add{\g@east@arrow01\rowaddfromlabel\rowaddtolabel}
+    \let\mult\g@east@mult
+    \g@defdim{sum}{\z@}%
+    \gdef\rowops{\PackageError{gauss}{Two sets of row operations were specified in just one matrix. This is not allowed.}}
+    \gdef\g@endregion{%
+        \end{picture}\egroup
+        \g@measureArea{rx}{0}{\the\g@maxrow}{sum}%
+        \g@dim{sum}{\wd\g@eastbox}%
+    }%
+    \global\setbox\g@eastbox=\hbox\bgroup
+    \begin{picture}(0,\g@double{h})(0,0)
+        \linethickness{\g@linethickness}%
+}
+\def\g@east@mult#1#2{%
+    \ifx *#1 
+        \g@for0\to\g@maxrow\do{\g@east@mult{##1}{#2}}%
+    \else
+        \g@checkBounds{r}{0}{#1}{\the\g@maxrow}%
+        \ifg@indexCorrect
+            \g@rbox{rx#1}{ry#1}{\rowmultlabel{#2}}
+            \g@dim{rx#1}{\g@d@tmpc}\advance\g@d@tmpc\wd\g@label
+            \g@defdim{rx#1}{\g@d@tmpc}%
+            \g@advance{rx#1}{\the\labelskip}%
+            \g@update{sum}{rx#1}%
+        \fi
+    \fi
+}
+\def\g@east@arrow#1#2#3#4{%
+ \@ifnextchar[%
+ {\g@east@arrow@a{#1}{#2}{#3}{#4}}%
+ {\g@east@arrow@b{#1}{#2}{#3}{#4}{}[]}%
+}
+\def\g@east@arrow@a#1#2#3#4[#5]{%
+ \@ifnextchar[%
+ {\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}}%
+ {\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[]}%
+}
+\def\g@east@arrow@b#1#2#3#4#5[#6]#7#8{%
+    \ifx *#7
+        \ifx *#8
+            \g@for0\to\g@maxrow\do{\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{*}}%
+        \else
+            \g@for#8\to0\do{\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{#8}}%
+            \g@for#8\to\g@maxrow\do{\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{##1}{#8}}%
+        \fi
+    \else
+        \ifx *#8
+            \g@for#7\to0\do{\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{#7}{##1}}%
+            \g@for#7\to\g@maxrow\do{\g@east@arrow@b{#1}{#2}{#3}{#4}{#5}[#6]{#7}{##1}}%
+        \else
+            \ifnum #7=#8\else
+                \g@checkBounds{r}{0}{#7}{\the\g@maxrow}%
+                \ifg@indexCorrect
+                    \g@checkBounds{r}{0}{#8}{\the\g@maxrow}%
+                    \ifg@indexCorrect
+                        \g@defdouble{tmp1}{\g@double{rx#7}}%
+                        \g@defdouble{tmp2}{\g@double{rx#8}}%
+                        \ifx0#1
+                            % use no arrow at start
+                            \g@advance{rx#7}{\the\rowopminsize}%
+                        \else
+                            % use an arrow at start
+                            \g@advance{rx#7}{\the\g@arrowwd}%
+                        \fi
+                        \ifx0#2
+                            % use no arrow at end
+                            \g@advance{rx#8}{\the\rowopminsize}%
+                        \else
+                            % use arrow at end
+                            \g@advance{rx#8}{\the\g@arrowwd}%
+                        \fi
+                        \g@measureArea{rx}{#7}{#8}{sum}% set sum = max_{i in {#7,...,#8}} rx<i>
+                        \ifx0#1
+                            \g@hline{tmp1}{ry#7}{sum}% draw line without arrow at the start
+                        \else
+                            \g@harrow{tmp1}{ry#7}{sum}% draw arrow and no line at the start
+                        \fi
+                        \ifx0#2
+                            \g@hline{tmp2}{ry#8}{sum}% draw line without arrow at the end
+                        \else
+                            \g@harrow{tmp2}{ry#8}{sum}% draw line without arrow at the start
+                        \fi
+                        \g@vline{sum}{ry#7}{ry#8}% draw vertical line from #7 to #8
+                        \setbox\g@b@tmpa=\hbox{$#3{#5}$}% #3 = label at start, #5 = label text
+                        \setbox\g@b@tmpb=\hbox{$#4{#6}$}% #4 = label at end, #6 = label text (for \add, #4 is \rowaddtolabel, this just ignores the argument; \swapp uses \rowswapptolabel which also ignores the argument)
+                        \ifdim\wd\g@b@tmpa>\z@ % if there actually is a label at the start (this is not the case for the default settings with \swapp and \rowswappto/fromlabel)
+                            \g@advance{sum}{\the\labelskip}%
+                        \else
+                            \ifdim\wd\g@b@tmpb>\z@
+                                % in case there already is a label at the start, there was already labelskip inserted and no more space needs to be added here
+                                \g@advance{sum}{\the\labelskip}% if there actually is a label at the start (this is not the case for the default settings with \swapp and \rowswappto/fromlabel)
+                            \fi 
+                        \fi 
+                        \g@d@tmpc\z@
+                        \ifdim\wd\g@b@tmpa>\z@
+                            % if there was a start label, place the label using rbox
+                            \g@rbox{sum}{ry#7}{\kern-\p@\vcenter{\box\g@b@tmpa}}%
+                            \g@d@tmpc=\wd\g@label
+                        \fi
+                        \ifdim\wd\g@b@tmpb>\z@
+                            % if there was an end label, place the label using rbox
+                            \g@rbox{sum}{ry#8}{\kern-\p@\vcenter{\box\g@b@tmpb}}%
+                            \ifdim \wd\g@label>\g@d@tmpc
+                                % if the width of this new (second) label is larger than the first one
+                                \g@d@tmpc=\wd\g@label
+                            \fi
+                        \fi
+                        \g@advance{sum}{\the\g@d@tmpc}%
+                        \g@advance{sum}{\the\opskip}%
+                        \g@updateArea{sum}{rx}{#7}{#8}%
+                    \fi
+                \fi
+            \fi
+        \fi
+    \fi
+}
+
+%
+% MATRIX ENVIRONMENTS
+%
+\newenvironment{gmatrix}[1][]
+{%
+    \unitlength=1pt%
+    \def\g@environment{#1matrix}%
+    \begin{g@matrix}%
+}{%
+    \end{g@matrix}%
+    \let\matrix\@empty
+    \let\endmatrix\@empty
+    \g@d@tmpa\ht\g@matrixbox \advance\g@d@tmpa\p@
+    \g@d@tmpb\dp\g@matrixbox \advance\g@d@tmpb\p@
+    \g@d@tmp\ht\g@northbox \ht\g@northbox\z@
+    \dp\g@northbox\z@
+    \ifdim \g@d@tmp>\z@
+        \advance\g@d@tmp-\opskip
+    \fi
+    \advance\g@d@tmp.5\ht\g@matrixbox
+    \advance\g@d@tmp.5\dp\g@matrixbox
+    \begin{\g@environment}%
+        \vcenter{\hbox{%
+            \rlap{\raise\ht\g@matrixbox\box\g@northbox}% north
+            % 1 additional pt above and below the matrix
+            \rule\z@\g@d@tmpa\lower\g@d@tmpb\null
+            \box\g@matrixbox% the matrix itself
+        }}%
+    \end{\g@environment}%
+    \rule\rowarrowsep\z@
+    \rule\z@\g@d@tmp
+    \g@dim{d}{\g@d@tmpa}%
+    \vcenter{\hbox{\lower\g@d@tmpa\box\g@eastbox}}%
+}
+
+\def\g@endmatrix{%
+            \mathstrut\crcr
+        \egroup % end of \halign
+    \egroup % end of \vbox, this contains the matrix
+    \global\setbox\g@matrixbox\lastbox
+    \g@measureAxis
+    \setbox\g@trash=\vbox{%
+    \unvcopy\g@matrixbox% unboxes g@matrixbox: copies the content of the vbox into this vbox but does not empty the box register g@matrixbox
+    \global\setbox\g@eastbox=\lastbox
+    \copy\g@eastbox
+    \g@d@tmp\z@ {\g@measureRows}% measure rows
+    }%
+    \setbox\g@trash=\hbox{%
+        \hbox to 100cm{.\hfill.}%
+        \unhbox\g@eastbox
+        \g@d@tmp\z@ {\g@measureCols}% measure columns
+    }%
+    \g@d@tmpa=\ht\g@matrixbox\advance\g@d@tmpa\dp\g@matrixbox
+    \g@defdim{h}{\g@d@tmpa}%
+    \g@defdim{w}{\wd\g@matrixbox}%
+    \g@defdim{d}{\dp\g@matrixbox}%
+}%
+
+\edef\g@prae{\hfil\noexpand\mathstrut$\relax}
+\edef\g@post{\relax$\hfil} 
+\newenvironment{g@matrix}
+{%
+    \setbox\g@trash=\hbox\bgroup
+    \global\g@maxrow@old\g@maxrow
+    \global\g@maxcol@old\g@maxcol
+    \global\g@maxrow0%
+    \global\g@maxcol0%
+    \let\rowops\g@east
+    \let\colops\g@north
+    \vbox\bgroup
+        % count rows while typesetting
+        \def\\{\mathstrut\cr\global\advance\g@maxrow1\relax}%
+        \global\let\g@endregion\g@endmatrix
+        \global\g@tab=2\arraycolsep
+        \ialign\bgroup\g@prae##\g@post&&\kern\g@tab\g@prae##\g@post\cr
+}{%
+        \g@endregion
+    \egroup % end of \hbox
+    % enable nested gmatrixes (for DniQ :-)
+    \global\g@maxrow\g@maxrow@old
+    \global\g@maxcol\g@maxcol@old
+    \global\let\g@endregion\g@endmatrix
+    \global\let\rowops\g@east
+    \global\let\colops\g@north
+}
+
+\def\newmatrix#1#2#3{%
+    \ifx g#3 \else
+        \ifx {#3}{g@} \else
+            \expandafter\ifx\csname#3matrix\endcsname\relax% tests whether this command sequence does not exist (is equal to the empty token)
+                \newenvironment{#3matrix}{\left#1\begin{matrix}}{\end{matrix}\right#2}% why do we need to wrap the \ialign in a matrix-environment?
+            \else
+                \renewenvironment{#3matrix}{\left#1\begin{matrix}}{\end{matrix}\right#2}%
+            \fi
+        \fi
+    \fi
+}
+
+\newmatrix()p % this is a very ugly solution and may yield unexpected results when using the amslatex pmatrix. The newmatrix-mechanism in general is not very compatible with other specialized matrix packages and thus needs to be localized to this package. Or at least the side effects of this action should be stated clearly!
+\newmatrix[]b
+\newmatrix\lbrace\rbrace B
+\newmatrix\lvert\rvert v
+\newmatrix\lVert\rVert V
+
+\def\rowmultlabel#1{|\,#1}
+\def\rowswapfromlabel#1{}
+\def\rowswaptolabel#1{}
+\def\rowaddfromlabel#1{\scriptstyle #1}
+\def\rowaddtolabel#1{\scriptscriptstyle +}
+\def\colmultlabel#1{%
+    \underline{\hbox to 1.2em{$\hss\mathstrut{}#1\hss$}}%
+}
+\def\colswapfromlabel#1{}
+\def\colswaptolabel#1{}
+\def\coladdfromlabel#1{\scriptstyle #1}
+\def\coladdtolabel#1{\scriptscriptstyle +}
+
+\newdimen\colarrowsep\colarrowsep=.5em
+\newdimen\rowarrowsep\rowarrowsep=.5em
+\newdimen\opskip\opskip=5pt
+\newdimen\labelskip\labelskip=4pt
+\newdimen\colopminsize\colopminsize=3pt
+\newdimen\rowopminsize\rowopminsize=3pt
+
+\makeatother
+\endinput
