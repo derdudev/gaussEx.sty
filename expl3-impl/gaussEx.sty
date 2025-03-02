@@ -91,7 +91,6 @@
 \cs_new:Npn \__gex_vertline: { \hbox:n { $\__gex_vertline_symb:$ }\kern-\lineskip }
 
 \cs_new:Npn \__gex_downarrow:n #1 {
-    \exp_args:Ne \iow_log:n { \dim_eval:n { \g__gex_arrowht } }
     \vbox:n {
         \vfill 
         \baselineskip0pt
@@ -100,21 +99,17 @@
             \dim_set_eq:NN \g_g_ex_tmpc_dim \g__gex_arrowht
         }{}
         \__gex_arrow_vline:
-        \iow_log:n { DEBUG4 }
         \kern\dim_eval:n { \g__gex_tmpc_dim }
-        \iow_log:n { DEBUG1 }
         \hbox_set:Nn \g__gex_trash { $\__gex_downarrow_symb:$ }
         \hbox:n { \box_move_up:nn { \box_dp:N \g__gex_trash } { \box_use:N \g__gex_trash } }
     }
 }
 \cs_new:Npn \__gex_arrow_vline: {
     \dim_sub:Nn \g__gex_tmpc_dim { \g__gex_arrowht }
-    \exp_args:Ne \iow_log:n { DEBUG2:~ \dim_eval:n { \g__gex_tmpc_dim } }
     \dim_compare:nNnTF { \g__gex_tmpc_dim } < { 0pt } { } {
         \__gex_vertline:
         \__gex_arrow_vline:
     }
-    \iow_log:n { DEBUG3 }
 }
 
 \ExplSyntaxOff
