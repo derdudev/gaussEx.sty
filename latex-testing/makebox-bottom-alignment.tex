@@ -1,0 +1,15 @@
+\documentclass{article}
+
+% SYNOPSIS: Weird, makebox takes the depth of g@label (glabel) into account. \raise\dp causes the depth of \glabel to be zero. Why is this needed? => SOLUTION: In g@north@arrow@b the depth of the glabel is not taken into account, only the height!
+
+\newbox\glabel
+
+\begin{document}
+\begin{picture}(200,100)
+    \setbox\glabel=\hbox{$\mathstrut\frac{111111}{222222}$}%
+    \setbox\glabel=\hbox{\raise\dp\glabel\box\glabel}% the raise by the depth is probably needed because the makebox aligns at the baseline and not the true bottom. 
+    \expandafter\wlog\expandafter{\the\dp\glabel}
+    \put(0,0){\makebox(0,0)[b]{\copy\glabel}}%
+    \put(0,0){\line(1,0){20}}
+\end{picture}
+\end{document}

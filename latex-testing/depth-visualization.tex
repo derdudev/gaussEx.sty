@@ -1,12 +1,14 @@
 \documentclass{article}
 \usepackage{tikz}
+
+\newbox\test
+\setbox\test=\hbox{Hallo}
+\expandafter\wlog\expandafter{\the\dp\test}
+
 \begin{document}
-
-\vspace{1cm}
-
 % Visualize the math axis
 \newbox\mathbox
-\setbox\mathbox=\hbox{Hallo $\frac{11111}{22222}=$} % Store the math content in a box
+\setbox\mathbox=\hbox{Hallo $(\frac{11111}{22222}=$} % Store the math content in a box
 
 % Calculate the math axis position
 \newdimen\mathaxis
@@ -14,7 +16,7 @@
 
 \begin{tikzpicture}
     % Place the math box
-    \node[anchor=base] (box) {\copy\mathbox};
+    \node[anchor=base,inner sep=0pt,outer sep=0pt] (box) {\copy\mathbox};
 
     % Draw the bounding box
     \draw[red] (box.north west) rectangle (box.south east);

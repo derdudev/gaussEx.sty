@@ -1264,7 +1264,7 @@
 %    \begin{macrocode}
 \def\g@cbox#1#2#3{%
  \setbox\g@label=\hbox{$\relax#3\relax$}%
- \setbox\g@label=\hbox{\raise\dp\g@label\box\g@label}%
+ \setbox\g@label=\hbox{\raise\dp\g@label\box\g@label}% the raise by the depth is probably needed because the makebox aligns at the baseline and not the true bottom. 
  \put(\g@double{#1},\g@double{#2})%
   {\makebox(0,0)[b]{\copy\g@label}}%
 }
