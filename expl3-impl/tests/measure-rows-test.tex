@@ -1,0 +1,34 @@
+\documentclass{article}
+
+% SYNOPSIS: Test successful (2025/03/02)
+
+\usepackage{../gaussEx}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\gexMeasureRows}{}{
+    \hbox{
+        \vbox{
+            \ialign{## && ##\cr A & B & $\frac{1}{2}$ \cr D & E & $\frac{1}{2}$ \cr}
+        }
+        \box_gset_to_last:N \g__gex_matrixbox
+        \box_log:N \g__gex_matrixbox
+    }
+    \vbox{%
+        \vbox_unpack:N \g__gex_matrixbox
+        \dim_set:Nn \g__gex_tmp_dim { \c_zero_dim }
+        \int_set:Nn \g__gex_maxrow { 1 }
+        \__gex_measure_axis:
+        \__gex_measure_rows:
+        \seq_log:N \g__gex_ry
+        \hbox{%
+            \box_use:N \g__gex_matrixbox
+            \rule{.5pt}{14.5pt}
+        }
+    }
+    
+}
+\ExplSyntaxOff
+
+\begin{document}
+\gexMeasureRows
+\end{document}

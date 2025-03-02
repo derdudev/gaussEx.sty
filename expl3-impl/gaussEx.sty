@@ -112,5 +112,43 @@
     }
 }
 
+% DEL: \redo, \g@del (\dim_to_decimal), \g@defdim (\dim_set), \g@defdouble (\fp_set), \g@dim (\fp_to_dim), \g@double (\fp_eval:n, \dim_eval:n), \g@advance (\dim_add, \fp_add), \g@min (\dim_min and \fp_min), \g@minD , \g@max, \g@maxD, \g@dist (\dim_sub, \fp_sub), \g@distD, \g@update (replace as moving along), \g@updateArea (implement first later, then see)
+
+\seq_new:N \g__gex_rx
+\seq_new:N \g__gex_ry
+\seq_new:N \g__gex_rb
+\seq_new:N \g__gex_rt
+\cs_new:Npn \__gex_measure_rows: {
+    \box_set_to_last:N \g__gex_trash
+    \int_compare:nNnTF { \g__gex_maxrow } < { 0 } {} {
+        \dim_compare:nNnTF { \box_ht:N \g__gex_trash } = { 0pt } {
+            \dim_add:Nn \g__gex_tmp_dim { \lastskip }
+            \unskip
+            \dim_add:Nn \g__gex_tmp_dim { \lastkern }
+            \unkern
+            \unpenalty
+        }{
+            \dim_add:Nn \g__gex_tmp_dim { \box_dp:N \g__gex_trash }
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_rb { \dim_eval:n { \g__gex_tmp_dim } }
+            \dim_add:Nn \g__gex_tmp_dim { \g__gex_axis_height }
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_ry { \dim_eval:n { \g__gex_tmp_dim } }
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_rx { \c_zero_dim }
+            \dim_sub:Nn \g__gex_tmp_dim { \g__gex_axis_height }
+            \dim_add:Nn \g__gex_tmp_dim { \box_ht:N \g__gex_trash }
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_rt { \dim_eval:n { \g__gex_tmp_dim } }
+            \int_decr:N \g__gex_maxrow
+        }
+        \__gex_measure_rows:
+    }
+}
+
+
+
+\cs_new:Npn \__gex_measure_axis: {
+    \hbox_set:Nn \g__gex_trash { $\vcenter{\hbox to 5pt{}}$ }
+    \dim_gset:Nn \g__gex_axis_height { \box_ht:N \g__gex_trash }
+}
+
+
 \ExplSyntaxOff
 \endinput

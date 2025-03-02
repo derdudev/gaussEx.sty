@@ -664,10 +664,10 @@
     \global\setbox\g@matrixbox\lastbox
     \g@measureAxis
     \setbox\g@trash=\vbox{%
-    \unvcopy\g@matrixbox% unboxes g@matrixbox: copies the content of the vbox into this vbox but does not empty the box register g@matrixbox
-    \global\setbox\g@eastbox=\lastbox
-    \copy\g@eastbox
-    \g@d@tmp\z@ {\g@measureRows}% measure rows
+        \unvcopy\g@matrixbox% unboxes g@matrixbox: copies the content of the vbox into this vbox but does not empty the box register g@matrixbox
+        \global\setbox\g@eastbox=\lastbox
+        \copy\g@eastbox
+        \g@d@tmp\z@ {\g@measureRows}% measure rows
     }%
     \setbox\g@trash=\hbox{%
         \hbox to 100cm{.\hfill.}%
@@ -685,18 +685,18 @@
 \newenvironment{g@matrix}
 {%
     \setbox\g@trash=\hbox\bgroup
-    \global\g@maxrow@old\g@maxrow
-    \global\g@maxcol@old\g@maxcol
-    \global\g@maxrow0%
-    \global\g@maxcol0%
-    \let\rowops\g@east
-    \let\colops\g@north
-    \vbox\bgroup
-        % count rows while typesetting
-        \def\\{\mathstrut\cr\global\advance\g@maxrow1\relax}%
-        \global\let\g@endregion\g@endmatrix
-        \global\g@tab=2\arraycolsep
-        \ialign\bgroup\g@prae##\g@post&&\kern\g@tab\g@prae##\g@post\cr
+        \global\g@maxrow@old\g@maxrow
+        \global\g@maxcol@old\g@maxcol
+        \global\g@maxrow0%
+        \global\g@maxcol0%
+        \let\rowops\g@east
+        \let\colops\g@north
+        \vbox\bgroup
+            % count rows while typesetting
+            \def\\{\mathstrut\cr\global\advance\g@maxrow1\relax}%
+            \global\let\g@endregion\g@endmatrix
+            \global\g@tab=2\arraycolsep
+            \ialign\bgroup\g@prae##\g@post&&\kern\g@tab\g@prae##\g@post\cr
 }{%
         \g@endregion
     \egroup % end of \hbox
