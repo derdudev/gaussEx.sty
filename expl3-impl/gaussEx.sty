@@ -1,0 +1,89 @@
+\ProvidesPackage{gaussEx}[2025/03/02]
+\RequirePackage{amsmath}
+\RequirePackage{expl3}
+
+\ExplSyntaxOn
+%
+% VARIABLES
+%
+% Boxes
+\box_new:N \g__gex_trash
+\box_new:N \g__gex_matrixbox
+\box_new:N \g__gex_eastbox
+\box_new:N \g__gex_northbox
+\box_new:N \g__gex_centerbox % NEW
+\box_new:N \g__gex_label
+\box_new:N \g__gex_tmp_box
+\box_new:N \g__gex_tmpa_box
+\box_new:N \g__gex_tmpb_box
+
+% Integers
+\int_new:N \g__gex_maxrow
+\int_new:N \g__gex_maxcol
+\int_new:N \g__gex_maxrow_old
+\int_new:N \g__gex_maxcol_old
+\int_new:N \g__gex_tmp_int % in gauss: g@c@tmp
+\int_new:N \g__gex_tmpa_int % g@c@tmpa
+
+% Dimensions
+\dim_new:N \g__gex_axis_height
+\dim_new:N \g__gex_linethickness
+\dim_new:N \g__gex_tab
+\dim_new:N \g__gex_arrowht
+\dim_new:N \g__gex_arrowwd
+\dim_new:N \g__gex_tmp_dim
+\dim_new:N \g__gex_tmpa_dim
+\dim_new:N \g__gex_tmpb_dim
+\dim_new:N \g__gex_tmpc_dim
+\dim_new:N \g__gex_tmpd_dim
+\dim_new:N \g__gex_tmpe_dim
+
+% DEL: The \g@for macro does not need to be implemented as its functionality should be given by \int_step_inline
+
+% Bounds check
+\bool_new:N \g__gex_index_in_bounds
+% Arguments:
+%   #1: Either the token "r" or "c"; "r" causes an Row-Bounds-Error to be thrown, "c" causes an Colum-Bounds-Error to be thrown
+%   #2: Integer 
+%   #3: Integer
+%   #4: Integer
+% Function: Sets \g__gex_index_in_bounds to true if #2<=#3<=#4 and to false if not
+\cs_new:Npn \__gex_check_bounds:nnnn #1#2#3#4 {
+    \bool_set_false:N \g__gex_index_in_bounds
+    % using \int_compare:nTF would result in clearer code, but a huge performance loss (5x slower that \int_compare:nNnTF)
+    \int_compare:nNnTF #2 > #3 {
+        \PackageError{gaussEx}{\__gex_short_bounds_error:n { #1 }~ #2>#3}{\__gex_long_bounds_error:n { #1 }}
+    }{
+        \int_compare:nNnTF #3 > #4 {
+            \PackageError{gaussEx}{\__gex_short_bounds_error:n { #1 }~ #3>#4}{\__gex_long_bounds_error:n { #1 }}
+        }{
+            \bool_set_true:N \g__gex_index_in_bounds
+        }
+    }
+}
+
+% Arguments: 
+%   #1: Either "r" (Row-Bounds-Error) or "c" (Column-Bounds-Error)
+\cs_new:Npn \__gex_short_bounds_error:n #1 {
+    \str_if_eq:nnTF { r } { #1 } { Row~ } { Column~ }
+    index~ out~ of~ bounds:
+}
+% Arguments: 
+%   #1: Either "r" (Row-Bounds-Error)) or "c" (Column-Bounds-Error)
+\cs_new:Npn \__gex_long_bounds_error:n #1 {
+    An~index~of~an~operation~points~to~a~
+    \str_if_eq:nnTF { r } { #1 } { row~ } { column~ }
+    that~ does~ not~ exist.\MessageBreak
+    Note~ that~ the~ index~ of~ the~ 
+    \str_if_eq:nnTF { r } { #1 } { bottom~ row~ } { leftmost~ column~ }
+    is~ 0~ while~ the~ index~ of~ the~
+    \str_if_eq:nnTF { r } { #1 } { top~ row~ } { rightmost~ column~ }
+    is~ <number~ of~
+    \str_if_eq:nnTF { r } { #1 } { rows~ } { columns~ } 
+    -~ 1>.
+}
+
+
+
+\ExplSyntaxOff
+\endinput

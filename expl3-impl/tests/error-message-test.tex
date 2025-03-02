@@ -1,0 +1,13 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\errormessagetest}{m}{
+    \__gex_long_bounds_error { #1 }
+}
+\ExplSyntaxOff
+
+\begin{document}
+\errormessagetest{r}
+\end{document}
