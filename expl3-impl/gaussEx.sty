@@ -144,8 +144,56 @@
     }
 }
 
+\seq_new:N \g__gex_cx
+\seq_new:N \g__gex_cy
+\seq_new:N \g__gex_ct
 \cs_new:Npn \__gex_measure_cols: {
     \box_set_to_last:N \g__gex_trash
+    \dim_compare:nNnTF { \box_wd:N \g__gex_trash } = { 100cm } {
+        \int_gset:Nn \g__gex_maxcol { \g__gex_maxcol }
+        \int_set:Nn \g__gex_tmp_int { \g__gex_maxcol - 1 }
+        \seq_log:N \g__gex_ct
+        \seq_log:N \g__gex_cy
+        \__gex_measure_cols_succ:
+        \int_gdecr:N \g__gex_maxcol
+    }{
+        \dim_compare:nNnTF { \box_ht:N \g__gex_trash } = { 0pt } {
+            \dim_add:Nn \g__gex_tmp_dim { \lastskip }
+            \unskip 
+            \dim_add:Nn \g__gex_tmp_dim { \lastkern }
+            \unkern 
+            \unpenalty
+        }{
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_ct { \dim_eval:n { \g__gex_tmp_dim } }
+            \dim_set:Nn \g__gex_tmp_dim { 0pt }
+            \exp_args:NNe \seq_gput_left:Nn \g__gex_cy { \dim_eval:n { \box_wd:N \g__gex_trash } }
+            \int_incr:N \g__gex_maxcol
+        }
+        \__gex_measure_cols:
+    }
+}
+
+% TODO: Rework with \seq_map_inline
+\cs_new:Npn \__gex_measure_cols_succ: {
+    \exp_args:Ne \iow_log:n { \int_eval:n \g__gex_tmp_int }
+    \if_int_compare:w \g__gex_tmp_int < 0 \else:
+        \seq_gpop_left:NN \g__gex_cy \l_tmp_tl 
+        \dim_set:Nn \g__gex_tmpa_dim { \l_tmp_tl }
+        \seq_gpop_left:NN \g__gex_ct \l_tmp_tl
+        \dim_set:Nn \g__gex_tmpb_dim { \l_tmp_tl }
+        \dim_add:Nn \g__gex_tmp_dim { .5\g__gex_tmpa_dim }
+        \seq_gput_right:Nn \g__gex_cy { 0pt }
+        \exp_args:NNe \seq_gput_left:Nn \g__gex_cx { \dim_eval:n { \g__gex_tmp_dim } }
+        \dim_add:Nn \g__gex_tmp_dim { .5\g__gex_tmpa_dim }
+        \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpb_dim }
+        \exp_args:Ne \iow_log:n { In~if:~\int_eval:n { \g__gex_tmp_int },~\int_eval:n { \g__gex_maxcol - 1 } }
+        \int_compare:nNnTF { \g__gex_tmp_int } = { \g__gex_maxcol-1 } {
+            \exp_args:Ne \iow_log:n { In~if:~\int_eval:n \g__gex_tmp_int }
+            \dim_add:Nn \g__gex_tmp_dim { .5\g__gex_tab }
+        }{}
+        \int_decr:N \g__gex_tmp_int
+        \__gex_measure_cols_succ:
+    \fi:
 }
 
 

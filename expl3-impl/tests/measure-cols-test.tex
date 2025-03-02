@@ -1,0 +1,42 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\gexMeasureCols}{}{
+    \hbox{
+        \dim_gset:Nn \g__gex_tab { 1cm }
+        \vbox{
+            \ialign{## &&\kern\g__gex_tab##\cr A & B & $\frac{1}{2}$ \cr D & E & $\frac{1}{2}$ \cr}
+        }
+        \box_gset_to_last:N \g__gex_matrixbox
+        \box_log:N \g__gex_matrixbox
+    }
+    \vbox{
+        \vbox_unpack:N \g__gex_matrixbox
+        \box_gset_to_last:N \g__gex_eastbox
+        \box_use:N \g__gex_eastbox
+    }
+    \hbox{%
+        \hbox to 100cm{.\hfill.}
+        \hbox_unpack:N \g__gex_eastbox
+        \dim_set:Nn \g__gex_tmp_dim { \c_zero_dim }
+        \int_set:Nn \g__gex_maxrow { 1 }
+        \__gex_measure_axis:
+        \dim_set:Nn \g__gex_tmp_dim { 0pt }
+        { \__gex_measure_cols: }
+        \seq_log:N \g__gex_cx
+        \vbox{
+            \hbox{\rule{\seq_item:Nn \g__gex_cx { 3 }}{1pt}}
+            \hbox{\rule{\seq_item:Nn \g__gex_cx { 2 }}{1pt}}
+            \hbox{\rule{\seq_item:Nn \g__gex_cx { 1 }}{1pt}}
+            \box_use:N \g__gex_matrixbox
+        }
+    }
+    
+}
+\ExplSyntaxOff
+
+\begin{document}
+\gexMeasureCols
+\end{document}
