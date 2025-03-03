@@ -1,16 +1,15 @@
 \documentclass{article}
 
-% SYNOPSIS: Test successful (2025/03/03)
-
 \usepackage{../gaussEx}
 
 \begin{document}
 \ExplSyntaxOn
 \hbox{
-    \rule{.5pt}{20pt}
-    \rule{.5pt}{10pt}
+    \__gex_measure_axis:
+    \rule{0.2pt}{20pt}
+    \rule{0.2pt}{10pt}
     \begin{picture}(200,100)
-        \__gex_vline:nnn { 0pt } { 10pt } { 20pt }
+        \__gex_varrow:nnn { 5pt } { 10pt } { 20pt }
     \end{picture}
 }
 \ExplSyntaxOff

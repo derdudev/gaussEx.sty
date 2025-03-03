@@ -90,6 +90,9 @@
 \DeclareMathSymbol{\__gex_vertline_symb:}{\mathord}{largesymbols}{`\?}
 \cs_new:Npn \__gex_vertline: { \hbox:n { $\__gex_vertline_symb:$ }\kern-\lineskip }
 
+% Arguments: 
+%   #1: dim expression; the length of the arrow
+% CAUTION: For this macro to not run infinitely, \g__gex_arrowht has to be non-zero!
 \cs_new:Npn \__gex_downarrow:n #1 {
     \vbox:n {
         \vfill 
@@ -206,8 +209,8 @@
     \dim_gset:Nn \g__gex_arrowwd { \box_ht:N \g__gex_trash }
 
     % Calculate the minimal width of a vertical arrow
-    \vbox_set:Nn \g__gex_trash { \g__gex_vertline }
-    \dim_gset:Nn \g__gex_arrowht { \box_ht_plus_dt:N \g__gex_gtrash }
+    \vbox_set:Nn \g__gex_trash { \__gex_vertline: }
+    \dim_gset:Nn \g__gex_arrowht { \box_ht_plus_dp:N \g__gex_trash }
     \dim_gadd:Nn \g__gex_arrowht { \lineskip }
 
     % Set thickness for all lines
@@ -240,6 +243,40 @@
     \dim_set:Nn \l_tmpa_dim { #3 }
     \dim_sub:Nn \l_tmpa_dim { #2 }
     \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { \dim_min:nn { #2 } { #3 } }){\line(0,1){\dim_to_decimal:n { \l_tmpa_dim }}}
+}
+
+% Arguments:
+%   #1: dim expression; the x-coordinate
+%   #2: dim expression; the y-coordinate
+%   #3: dim expression; the length of the vertical line 
+% Function: Draws a vertical line from (#1,#2) to (#1,#2+#3). In particular #3 can be negative. Then the line is drawn to the south, otherwise to the north of (#1,#2)
+\cs_new:Npn \__gex_vline_by_length:nnn #1#2#3 {
+    \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { #2 }){\line(0,1){\dim_to_decimal:n { #3 }}}
+}
+
+% Arguments:
+%   #1: dim expression; the x-coordinate
+%   #2: dim expression; the first y-coordinate
+%   #3: dim expression; the second y-coordinate
+% Function: Draws a vertical arrow from (#1,max(#2,#3)) to (#1,min(#2,#3)), i.e. always from top to bottom; 
+% CAUTION: For this macro to not run infinitely, \g__gex_arrowht has to be non-zero
+\cs_new:Npn \__gex_varrow:nnn #1#2#3 {
+    \dim_set:Nn \l_tmpa_dim { #3 }
+    \dim_sub:Nn \l_tmpa_dim { #2 }
+    \__gex_cbox:nnn { #1 } { #2 } { \__gex_downarrow:n { \dim_eval:n { \l_tmpa_dim } } }
+}
+
+
+% Boxes
+% Arguments: 
+%   #1: dim expression; 
+%   #2: dim expression; 
+%   #3: dim expression; 
+% Function: Column box
+\cs_new:Npn \__gex_cbox:nnn #1#2#3 {
+    \hbox_set:Nn \g__gex_label { $\relax#3\relax$ }
+    \hbox_set:Nn \g__gex_label { \box_move_up:nn { \box_dp:N \g__gex_label } { \box_use:N \g__gex_label } }
+    \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { #2 }){\makebox(0,0)[b]{\box_use:N \g__gex_label }}
 }
 
 \ExplSyntaxOff
