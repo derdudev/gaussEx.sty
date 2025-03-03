@@ -1,0 +1,19 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\begin{document}
+\ExplSyntaxOn
+\vbox{
+    \__gex_measure_axis:
+    \hbox{\rule{20pt}{0.2pt}}
+    \hbox{\rule{10pt}{0.2pt}}
+    \hbox{%
+        \begin{picture}(200,1)
+            \__gex_hline:nnn { 0pt } { 0pt } { 20pt }
+            \__gex_hline_by_length:nnn { 0pt } { 1pt } { 10pt }
+        \end{picture}
+    }
+}
+\ExplSyntaxOff
+\end{document}

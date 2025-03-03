@@ -266,8 +266,28 @@
     \__gex_cbox:nnn { #1 } { #2 } { \__gex_downarrow:n { \dim_eval:n { \l_tmpa_dim } } }
 }
 
+% Arguments:
+%   #1: dim expression; the first x-coordinate
+%   #2: dim expression; the y-coordinate
+%   #3: dim expression; the second x-coordinate
+% Function: Draws a horizontal line from (#1,#2) to (#3,#2)
+\cs_new:Npn \__gex_hline:nnn #1#2#3 {
+    \dim_set:Nn \l_tmpa_dim { #3 }
+    \dim_sub:Nn \l_tmpa_dim { #1 }
+    \put(\dim_to_decimal:n { \dim_min:nn { #1 } { #3 } }, \dim_to_decimal:n { #2 }){\line(1,0){\dim_to_decimal:n { \l_tmpa_dim }}}
+}
+
+% Arguments:
+%   #1: dim expression; the x-coordinate
+%   #2: dim expression; the y-coordinate
+%   #3: dim expression; the length of the vertical line 
+% Function: Draws a horizontal line from (#1,#2) to (#1+#3,#2). In particular #3 can be negative. Then the line is drawn to the west, otherwise to the east of (#1,#2)
+\cs_new:Npn \__gex_hline_by_length:nnn #1#2#3 {
+    \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { #2 }){\line(1,0){\dim_to_decimal:n { #3 }}}
+}
 
 % Boxes
+
 % Arguments: 
 %   #1: dim expression; 
 %   #2: dim expression; 
@@ -278,6 +298,8 @@
     \hbox_set:Nn \g__gex_label { \box_move_up:nn { \box_dp:N \g__gex_label } { \box_use:N \g__gex_label } }
     \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { #2 }){\makebox(0,0)[b]{\box_use:N \g__gex_label }}
 }
+
+
 
 \ExplSyntaxOff
 \endinput
