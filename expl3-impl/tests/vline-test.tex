@@ -1,0 +1,15 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\begin{document}
+\ExplSyntaxOn
+\hbox{
+    \rule{.5pt}{20pt}
+    \rule{.5pt}{10pt}
+    \begin{picture}(200,100)
+        \__gex_vline:nnn { 0pt } { 10pt } { 20pt }
+    \end{picture}
+}
+\ExplSyntaxOff
+\end{document}
