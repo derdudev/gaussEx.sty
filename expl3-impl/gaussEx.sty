@@ -196,8 +196,6 @@
     \fi:
 }
 
-
-
 \cs_new:Npn \__gex_measure_axis: {
     % Calculate the distance of the math axis to the baseline
     \hbox_set:Nn \g__gex_trash { $\vcenter{\hbox to 5pt{}}$ }
@@ -214,6 +212,18 @@
 
     % Set thickness for all lines
     \dim_gset:Nn \g__gex_linethickness { \fboxrule\relax }
+}
+
+% Arguments:
+%   #1: The sequence over the maximum over the index range {#2,...,#3} is calculated. The sequence is expected to contain token lists that can be evaluated as dim expressions by \dim_eval:n
+%   #2: Start index of the range (inclusive)
+%   #3: End index of the range (inclusive)
+%   #4: dim variable into which the maximum will be saved
+\cs_new:Npn \__gex_get_max_over_range:NnnN #1#2#3#4 {
+    \dim_gset:Nn #4 { 0pt }
+    \int_step_inline:nnn { #2 } { #3 } {
+        \dim_gset:Nn #4 { \dim_max:nn { #4 } { \seq_item:Nn #1 { ##1 } } }
+    }
 }
 
 

@@ -1,0 +1,17 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\begin{document}
+\ExplSyntaxOn
+\seq_put_right:Nn \l_tmpa_seq { 1pt }
+\seq_put_right:Nn \l_tmpa_seq { 2pt }
+\seq_put_right:Nn \l_tmpa_seq { 20pt }
+\seq_put_right:Nn \l_tmpa_seq { 4pt }
+\seq_put_right:Nn \l_tmpa_seq { 5pt }
+\seq_put_right:Nn \l_tmpa_seq { 6pt }
+
+\__gex_get_max_over_range:NnnN \l_tmpa_seq { 2 } { 5 } \l_tmpa_dim
+\dim_log:N \l_tmpa_dim
+\ExplSyntaxOff
+\end{document}
