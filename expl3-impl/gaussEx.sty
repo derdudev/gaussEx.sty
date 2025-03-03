@@ -199,8 +199,21 @@
 
 
 \cs_new:Npn \__gex_measure_axis: {
+    % Calculate the distance of the math axis to the baseline
     \hbox_set:Nn \g__gex_trash { $\vcenter{\hbox to 5pt{}}$ }
     \dim_gset:Nn \g__gex_axis_height { \box_ht:N \g__gex_trash }
+
+    % Calculate the width of a \leftarrow 
+    \hbox_set:Nn \g__gex_trash { $\leftarrow$ }
+    \dim_gset:Nn \g__gex_arrowwd { \box_ht:N \g__gex_trash }
+
+    % Calculate the minimal width of a vertical arrow
+    \vbox_set:Nn \g__gex_trash { \g__gex_vertline }
+    \dim_gset:Nn \g__gex_arrowht { \box_ht_plus_dt:N \g__gex_gtrash }
+    \dim_gadd:Nn \g__gex_arrowht { \lineskip }
+
+    % Set thickness for all lines
+    \dim_gset:Nn \g__gex_linethickness { \fboxrule\relax }
 }
 
 
