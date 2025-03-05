@@ -538,12 +538,11 @@
     \end{ pmatrix }
     \rule{\rowarrowsep}{0pt}
     \rule{0pt}{\dim_eval:n { \g__gex_tmp_dim }}
-    % ATTENTION:
-    % \vcenter{
-    %     \hbox:n {
-    %         \box_move_down:nn { \g__gex_matrix_dp } { \box_use:N \g__gex_eastbox }
-    %     }
-    % }
+    \vcenter{
+        \hbox:n {
+            \box_move_down:nn { \g__gex_matrix_dp } { \box_use:N \g__gex_eastbox }
+        }
+    }
 }
 
 \cs_new:Npn \__gex_endmatrix: {
@@ -566,6 +565,7 @@
         \hbox_to_wd:nn { 100cm } { .\hfill. }
         % \box_log:N \g__gex_eastbox
         \hbox_unpack:N \g__gex_eastbox
+        \box_gclear:N \g__gex_eastbox % hbox_unpack = unhcopy not unhbox
         \dim_set:Nn \g__gex_tmp_dim { 0pt }
         {
             \__gex_measure_cols:
