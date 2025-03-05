@@ -1,0 +1,14 @@
+\documentclass{article}
+
+\NewDocumentCommand{\test}{O{} O{} m}{
+    Test 1:#1 2:#2 3:#3 STOP
+    \testtwo{#1}
+}
+
+\NewDocumentCommand{\testtwo}{ m }{
+    TestTwo #1
+}
+
+\begin{document}
+\test[c]{a}{b}
+\end{document}

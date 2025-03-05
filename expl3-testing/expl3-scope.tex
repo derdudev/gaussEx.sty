@@ -1,0 +1,30 @@
+\documentclass{article}
+
+\begin{document}
+\ExplSyntaxOn
+
+% Start a local group
+{
+    % Define the global version of \colops
+    \RenewDocumentCommand { \colops } {} {
+        \tl_set:Nn \l_tmpa_tl { Global column operations }
+        \tl_use:N \l_tmpa_tl
+    }
+    {
+        % Locally redefine \colops
+        \RenewDocumentCommand { \colops } {} {
+            \tl_set:Nn \l_tmpa_tl { Local column operations }
+            \tl_use:N \l_tmpa_tl
+        }
+
+        % Test the local version
+        \colops % Outputs: Local column operations
+    }
+    % Outside the group, the global version is restored
+    \colops % Outputs: Global column operations
+}
+% Outside the group, the global version is restored
+\colops % Outputs: Global column operations
+
+\ExplSyntaxOff
+\end{document}

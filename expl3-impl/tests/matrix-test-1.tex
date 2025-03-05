@@ -1,0 +1,19 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\showboxdepth=3   % Set maximum depth to 3 (default is 3)
+\showboxbreadth=5 % Set maximum breadth to 5 (default is 5)
+
+\begin{document}
+\begin{equation*}
+    \begin{gexmatrix}{p}
+        1 & \displaystyle\sum_{i=1}^n & \frac{1}{2} & 15 \\
+        4 & 5 & \displaystyle\frac{1}{2} & 2
+        \colops 
+        \add[2]{1}{2}
+        \add[-1]{1}{3}
+        \mult{1}{2}
+    \end{gexmatrix}
+\end{equation*}
+\end{document}
