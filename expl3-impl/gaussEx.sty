@@ -59,10 +59,10 @@
 \cs_new:Npn \__gex_check_bounds:nnnn #1#2#3#4 {
     \bool_set_false:N \g__gex_index_in_bounds
     % using \int_compare:nTF would result in clearer code, but a huge performance loss (5x slower that \int_compare:nNnTF)
-    \int_compare:nNnTF #2 > #3 {
+    \int_compare:nNnTF {#2} > {#3} {
         \PackageError{gaussEx}{\__gex_short_bounds_error:n { #1 }~ #2>#3}{\__gex_long_bounds_error:n { #1 }}
     }{
-        \int_compare:nNnTF #3 > #4 {
+        \int_compare:nNnTF {#3} > {#4} {
             \PackageError{gaussEx}{\__gex_short_bounds_error:n { #1 }~ #3>#4}{\__gex_long_bounds_error:n { #1 }}
         }{
             \bool_set_true:N \g__gex_index_in_bounds
@@ -195,7 +195,7 @@
         \dim_set:Nn \g__gex_tmpb_dim { \l_tmp_tl }
         \dim_add:Nn \g__gex_tmp_dim { .5\g__gex_tmpa_dim }
         \seq_gput_right:Nn \g__gex_cy { 0pt }
-        \exp_args:NNe \seq_gput_left:Nn \g__gex_cx { \dim_eval:n { \g__gex_tmp_dim } }
+        \exp_args:NNe \seq_gput_right:Nn \g__gex_cx { \dim_eval:n { \g__gex_tmp_dim } }
         \dim_add:Nn \g__gex_tmp_dim { .5\g__gex_tmpa_dim }
         \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpb_dim }
         % \exp_args:Ne \iow_log:n { In~if:~\int_eval:n { \g__gex_tmp_int },~\int_eval:n { \g__gex_maxcol - 1 } }
@@ -358,13 +358,13 @@
         \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \colarrowsep } { \box_use:N \g__gex_northbox } }
     }
     \NewDocumentCommand { \swap } { O{} O{} m m } {
-        \__gex_north_arrow:nnNNnnnn { 1 } { 1 } { \colswapfromlabel } { \colswaptolabel } { ##1 } { ##2 } { ##3 } { ##4 }
+        \__gex_north_arrow:nnNNnnnn { 1 } { 1 } { \colswapfromlabel } { \colswaptolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
     }
     \NewDocumentCommand { \add } { O{} O{} m m } {
-        \__gex_north_arrow:nnNNnnnn { 0 } { 1 } { \coladdfromlabel } { \coladdtolabel } { ##1 } { ##2 } { ##3 } { ##4 }
+        \__gex_north_arrow:nnNNnnnn { 0 } { 1 } { \coladdfromlabel } { \coladdtolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
     }
     \NewDocumentCommand { \mult } { m m } {
-        \__gex_north_mult:nn { ##1 } { ##2 }
+        \__gex_north_mult:nn { ##1+1 } { ##2 }
     }
     \dim_set:Nn \l_tmpa_dim { 0pt }
     \setbox\l__gex_tmp_tex_box=\hbox\bgroup
@@ -381,7 +381,7 @@
             \__gex_north_mult:nn { ##1 } { #2 }
         }
     }{
-        \__gex_check_bounds:nnnn { c } { 0 } { #1 } { \g__gex_maxcol }
+        \__gex_check_bounds:nnnn { c } { 1 } { #1 } { \g__gex_maxcol+1 }
         \if_bool:N \g__gex_index_in_bounds
             \__gex_cbox:nnn { \seq_item:Nn \g__gex_cx { #1 } } { \seq_item:Nn \g__gex_cy { #1 } } { \colmultlabel{#2} }
             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { #1 } }
@@ -427,9 +427,9 @@
             }
         } {
             \int_compare:nNnTF { #7 } = { #8 } {} {
-                \__gex_check_bounds:nnnn { c } { 0 } { #7 } { \g__gex_maxcol }
+                \__gex_check_bounds:nnnn { c } { 1 } { #7 } { \g__gex_maxcol+1 }
                 \if_bool:N \g__gex_index_in_bounds 
-                    \__gex_check_bounds:nnnn { c } { 0 } { #8 } { \g__gex_maxcol }
+                    \__gex_check_bounds:nnnn { c } { 1 } { #8 } { \g__gex_maxcol+1 }
                     \if_bool:N \g__gex_index_in_bounds
                         \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { #7 } }
                         \dim_set:Nn \l_tmpb_dim { \seq_item:Nn \g__gex_cy { #8 } }
