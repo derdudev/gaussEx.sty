@@ -357,13 +357,14 @@
         \box_set_ht:Nn \g__gex_northbox { \l_tmpa_dim }
         \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \colarrowsep } { \box_use:N \g__gex_northbox } }
     }
-    \NewDocumentCommand { \swap } { O{} O{} m m } {
+    % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
+    \DeclareDocumentCommand { \swap } { O{} O{} m m } {
         \__gex_north_arrow:nnNNnnnn { 1 } { 1 } { \colswapfromlabel } { \colswaptolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
     }
-    \NewDocumentCommand { \add } { O{} O{} m m } {
+    \DeclareDocumentCommand { \add } { O{} O{} m m } {
         \__gex_north_arrow:nnNNnnnn { 0 } { 1 } { \coladdfromlabel } { \coladdtolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
     }
-    \NewDocumentCommand { \mult } { m m } {
+    \DeclareDocumentCommand { \mult } { m m } {
         \__gex_north_mult:nn { ##1+1 } { ##2 }
     }
     \dim_set:Nn \l_tmpa_dim { 0pt }
@@ -497,6 +498,55 @@
 }
 
 % MISSING: Implementation for east (but this comes after testing the north region)
+% CAUTION: requires \rowops to already be defined somewhere
+\cs_new:Npn \__gex_east: {
+    \__gex_endregion:
+    \RenewDocumentCommand { \rowops } { } { \PackageError{gauss}{Two~ sets~ of~ row~ operations~ were~ specified~ in~ just~ one~ matrix.~ This~ is~ not~ allowed.} }
+    % DEL: \g@defdim{sum}{\z@}%
+    \cs_gset:Npn \__gex_endregion: {
+            \end{picture}
+        \egroup
+        \hbox_gset:Nn \g__gex_eastbox { \unhbox\l__gex_tmp_tex_box }
+        % TODO: Take index shift of sequences into account!
+        \__gex_get_max_over_range:NnnN \g__gex_rx { 1 } { \g__gex_maxrow+1 } { \l_tmpa_dim }
+        \box_set_wd:Nn \g__gex_eastbox { \l_tmpa_dim }
+        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \colarrowsep } { \box_use:N \g__gex_northbox } }
+    }
+    % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
+    \DeclareDocumentCommand { \swap } { O{} O{} m m } {
+        \__gex_east_arrow:nnNNnnnn { 1 } { 1 } { \rowswapfromlabel } { \rowswaptolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
+    }
+    \DeclareDocumentCommand { \add } { O{} O{} m m } {
+        \__gex_east_arrow:nnNNnnnn { 0 } { 1 } { \rowaddfromlabel } { \rowaddtolabel } { ##1 } { ##2 } { \int_eval:n { ##3+1 } } { \int_eval:n { ##4+1 } }
+    }
+    \DeclareDocumentCommand { \mult } { m m } {
+        \__gex_east_mult:nn { ##1+1 } { ##2 }
+    }
+    \dim_set:Nn \l_tmpa_dim { 0pt }
+    \setbox\l__gex_tmp_tex_box=\hbox\bgroup
+        \begin{picture}(0,\dim_to_decimal:n { \g__gex_matrix_ht })(0,0)
+            \linethickness{\dim_eval:n { \g__gex_linethickness } }
+}
+
+% Arguments: 
+%   #1: int expression or *; 
+%   #2: math content; 
+\cs_new:Npn \__gex_east_mult:nn #1#2 {
+    \str_if_eq:nnTF { #1 } { * } {
+        \int_step_inline:nnn { 0 } { \g__gex_maxrow } {
+            \__gex_east_mult:nn { ##1 } { #2 }
+        }
+    }{
+        \__gex_check_bounds:nnnn { c } { 1 } { #1 } { \g__gex_maxrow+1 }
+        \if_bool:N \g__gex_index_in_bounds
+            \__gex_rbox:nnn { \seq_item:Nn \g__gex_rx { #1 } } { \seq_item:Nn \g__gex_ry { #1 } } { \rowmultlabel{#2} }
+            \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { #1 } }
+            \dim_add:Nn \l_tmpa_dim { \box_wd:N \g__gex_label }
+            \exp_args:NNne \seq_set_item:Nnn \g__gex_rx { #1 } { \dim_eval:n { \l_tmpa_dim + \labelskip } } % maybe here use \opskip and not \labelskip 
+            % DEL: \g@update{sum}{rx#1}. 
+        \fi:
+    }
+}
 
 %
 % MATRIX ENVIRONMENTS
