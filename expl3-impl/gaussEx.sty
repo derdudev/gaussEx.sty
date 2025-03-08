@@ -215,7 +215,7 @@
 
     % Calculate the width of a \leftarrow 
     \hbox_set:Nn \g__gex_trash { $\leftarrow$ }
-    \dim_gset:Nn \g__gex_arrowwd { \box_ht:N \g__gex_trash }
+    \dim_gset:Nn \g__gex_arrowwd { \box_wd:N \g__gex_trash }
 
     % Calculate the minimal width of a vertical arrow
     \vbox_set:Nn \g__gex_trash { \__gex_vertline: }
@@ -255,7 +255,7 @@
     \exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
     \dim_sub:Nn \l_tmpa_dim { #2 }
     \exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
-    \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { \dim_min:nn { #2 } { #3 } }){\line(0,1){\dim_to_decimal:n { \l_tmpa_dim }}}
+    \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { \dim_min:nn { #2 } { #3 } }){\line(0,1){\dim_to_decimal:n { \dim_abs:n { \l_tmpa_dim } }}}
 }
 
 % Arguments:
@@ -378,7 +378,7 @@
 %   #2: math content; 
 \cs_new:Npn \__gex_north_mult:nn #1#2 {
     \str_if_eq:nnTF { #1 } { * } {
-        \int_step_inline:nnn { 0 } { \g__gex_maxcol } {
+        \int_step_inline:nnn { 1 } { \g__gex_maxcol+1 } {
             \__gex_north_mult:nn { ##1 } { #2 }
         }
     }{
@@ -393,7 +393,7 @@
     }
 }
 
-% DEL: 
+% DEL: \g@north@arrow, \gﬂnorth@arrow@a 
 
 % Arguments: 
 %   #1: Arrow at start position #7 (Yes: 1/No: 0)
@@ -407,24 +407,24 @@
 \cs_new:Npn \__gex_north_arrow:nnNNnnnn #1#2#3#4#5#6#7#8 {
     \str_if_eq:nnTF { #7 } { * } {
         \str_if_eq:nnTF { #8 } { * } {
-            \int_step_inline:nnn { 0 } { \g__gex_maxcol } {
-                \__gex_north_arrow_general:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { * }
+            \int_step_inline:nnn { 1 } { \g__gex_maxcol+1 } {
+                \__gex_north_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { * }
             }
         }{
-            \int_step_inline:nnnn { #8 } { -1 } { 0 } {
-                \__gex_north_arrow_general:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
+            \int_step_inline:nnnn { #8 } { -1 } { 1 } {
+                \__gex_north_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
             }
-            \int_step_inline:nnnn { #8 } { \g__gex_maxcol } {
-                \__gex_north_arrow_general:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
+            \int_step_inline:nnnn { #8 } { \g__gex_maxcol+1 } {
+                \__gex_north_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
             }
         }
     }{
         \str_if_eq:nnTF { #8 } { * } {
-            \int_step_inline:nnnn { #7 } { -1 } { 0 } {
-                \__gex_north_arrow_general:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
+            \int_step_inline:nnnn { #7 } { -1 } { 1 } {
+                \__gex_north_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
             }
-            \int_step_inline:nnn { #7 } { \g__gex_maxcol } {
-                \__gex_north_arrow_general:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
+            \int_step_inline:nnn { #7 } { \g__gex_maxcol+1 } {
+                \__gex_north_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
             }
         } {
             \int_compare:nNnTF { #7 } = { #8 } {} {
@@ -533,7 +533,7 @@
 %   #2: math content; 
 \cs_new:Npn \__gex_east_mult:nn #1#2 {
     \str_if_eq:nnTF { #1 } { * } {
-        \int_step_inline:nnn { 0 } { \g__gex_maxrow } {
+        \int_step_inline:nnn { 1 } { \g__gex_maxrow+1 } {
             \__gex_east_mult:nn { ##1 } { #2 }
         }
     }{
@@ -545,6 +545,108 @@
             \exp_args:NNne \seq_set_item:Nnn \g__gex_rx { #1 } { \dim_eval:n { \l_tmpa_dim + \labelskip } } % maybe here use \opskip and not \labelskip 
             % DEL: \g@update{sum}{rx#1}. 
         \fi:
+    }
+}
+
+% Arguments: 
+%   #1: Arrow at start position #7 (Yes: 1/No: 0)
+%   #2: Arrow at end position #8 (Yes: 1/No: 0)
+%   #3: Label at start position #7 (Function with one argument)
+%   #4: Label at end position #8 (Function with one argument)
+%   #5: The content of the start label (The argument that is given to the function #3)
+%   #6: The content of the end label (The argument that is given to the function #4)
+%   #7: Start position (int expression) or * 
+%   #8: End position (int expression) or *
+\cs_new:Npn \__gex_east_arrow:nnNNnnnn #1#2#3#4#5#6#7#8 {
+    \str_if_eq:nnTF { #7 } { * } {
+        \str_if_eq:nnTF { #8 } { * } {
+            \int_step_inline:nnn { 1 } { \g__gex_maxrow+1 } {
+                \__gex_east_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { * }
+            }
+        }{
+            \int_step_inline:nnnn { #8 } { -1 } { 1 } {
+                \__gex_east_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
+            }
+            \int_step_inline:nnnn { #8 } { \g__gex_maxrow+1 } {
+                \__gex_east_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { ##1 } { #8 }
+            }
+        }
+    }{
+        \str_if_eq:nnTF { #8 } { * } {
+            \int_step_inline:nnnn { #7 } { -1 } { 1 } {
+                \__gex_east_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
+            }
+            \int_step_inline:nnn { #7 } { \g__gex_maxrow+1 } {
+                \__gex_east_arrow:nnNNnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 } { #7 } { ##1 }
+            }
+        } {
+            \int_compare:nNnTF { #7 } = { #8 } {} {
+                \__gex_check_bounds:nnnn { c } { 1 } { #7 } { \g__gex_maxrow+1 }
+                \if_bool:N \g__gex_index_in_bounds 
+                    \__gex_check_bounds:nnnn { c } { 1 } { #8 } { \g__gex_maxrow+1 }
+                    \if_bool:N \g__gex_index_in_bounds
+                        \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { #7 } }
+                        \dim_set:Nn \l_tmpb_dim { \seq_item:Nn \g__gex_rx { #8 } }
+                        \str_if_eq:nnTF { #1 } { 0 } {
+                            \exp_args:Ne \iow_log:n { TB1:\seq_item:Nn \g__gex_rx { #7 } }
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #7 } { \dim_eval:n { \l_tmpa_dim + \colopminsize } }
+                            \exp_args:Ne \iow_log:n { TB2:\seq_item:Nn \g__gex_rx { #7 } }
+                        }{
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #7 } { \dim_eval:n { \l_tmpa_dim + \g__gex_arrowwd } }
+                        }
+                        \str_if_eq:nnTF { #2 } { 0 } {
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #8 } { \dim_eval:n { \l_tmpb_dim + \colopminsize } }
+                        } {
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #8 } { \dim_eval:n { \l_tmpb_dim + \g__gex_arrowwd } }
+                        }
+                        \seq_log:N \g__gex_rx
+                        \__gex_get_max_over_range:NnnN \g__gex_rx { #7 } { #8 } \g__gex_tmp_dim
+                        \dim_log:N \g__gex_tmp_dim
+                        \str_if_eq:nnTF { #1 } { 0 } {
+                            \iow_log:n { TA1 }
+                            \exp_args:Ne \iow_log:n { \dim_eval:n { \l_tmpa_dim }}
+                            \exp_args:Ne \iow_log:n { \dim_eval:n { \g__gex_tmp_dim }}
+                            \exp_args:Neee \__gex_hline:nnn { \dim_eval:n { \l_tmpa_dim } } { \seq_item:Nn \g__gex_ry { #7 } } { \dim_eval:n { \g__gex_tmp_dim } }
+                        } {
+                            \exp_args:Neee \__gex_harrow:nnn { \dim_eval:n { \l_tmpa_dim } } { \seq_item:Nn \g__gex_ry { #7 } } { \dim_eval:n { \g__gex_tmp_dim } }
+                        }
+                        \str_if_eq:nnTF { #2 } { 0 } {
+                            \exp_args:Neee \__gex_hline:nnn { \dim_eval:n { \l_tmpb_dim } } { \seq_item:Nn \g__gex_ry { #8 } } { \dim_eval:n { \g__gex_tmp_dim } }
+                        } {
+                            \exp_args:Neee \__gex_harrow:nnn { \dim_eval:n { \l_tmpb_dim } } { \seq_item:Nn \g__gex_ry { #8 } } { \dim_eval:n { \g__gex_tmp_dim } }
+                        }
+                        \exp_args:Neee \__gex_vline:nnn { \g__gex_tmp_dim } { \seq_item:Nn \g__gex_ry { #7 } } { \seq_item:Nn \g__gex_ry { #8 } }
+                        \hbox_set:Nn \l_tmpa_box { $#3{#5}$ }
+                        \hbox_set:Nn \l_tmpb_box { $#4{#5}$ }
+                        \dim_compare:nNnTF { \box_wd:N \l_tmpa_box } > { 0pt } {
+                            \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                        } {
+                            \dim_compare:nNnTF { \box_wd:N \l_tmpb_box } > { 0pt } {
+                                \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                            } {}
+                        }
+                        \dim_set:Nn \g__gex_tmpc_dim { 0pt }
+                        \dim_compare:nNnTF { \box_wd:N \l_tmpa_box } > { 0pt } {
+                            \exp_args:Neee \__gex_rbox:nnn { \g__gex_tmp_dim } { \seq_item:Nn \g__gex_ry { #7 } } { \kern-1pt\vcenter{\box_use:N \l_tmpa_box} }
+                            \dim_set:Nn \g__gex_tmpc_dim { \box_wd:N \g__gex_label }
+                        } {}
+                        \dim_compare:nNnTF { \box_wd:N \l_tmpb_box } > { 0pt } {
+                            \exp_args:Neee \__gex_rbox:nnn { \g__gex_tmp_dim } { \seq_item:Nn \g__gex_ry { #8 } } { \kern-1pt\vcenter{\box_use:N \l_tmpb_box} }
+                            \dim_compare:nNnTF { \box_wd:N \g__gex_label } > { \g__gex_tmpc_dim } {
+                                \dim_set:Nn \g__gex_tmpc_dim { \box_wd:N \g__gex_label }
+                            } {}
+                        } {}
+                        \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpc_dim }
+                        \dim_add:Nn \g__gex_tmp_dim { \the\opskip }
+                        % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
+                        \int_step_inline:nnn { #7 } { #8 } {
+                            \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
+                            \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                        }
+                    \fi: 
+                \fi: 
+            }
+        }
     }
 }
 
@@ -661,7 +763,7 @@
 
 \ExplSyntaxOff
 
-\def\rowmultlabel#1{|\,#1}
+\def\rowmultlabel#1{|\cdot#1}
 \def\rowswapfromlabel#1{}
 \def\rowswaptolabel#1{}
 \def\rowaddfromlabel#1{\scriptstyle #1}
