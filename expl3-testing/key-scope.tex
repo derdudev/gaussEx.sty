@@ -1,0 +1,24 @@
+\documentclass{article}
+
+% SYNOPSIS: Using keys in the below way with variables, then the assignments are local!
+
+\ExplSyntaxOn
+\keys_define:nn { test } {
+    A .tl_set:N = \g_tmpa_tl,
+    A .initial:n = { hallo }
+}
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+{
+    \keys_set:nn { test } {
+        A = welt
+    }    
+    \tl_log:N \g_tmpa_tl
+}
+\tl_log:N \g_tmpa_tl
+\ExplSyntaxOff
+
+\end{document}
