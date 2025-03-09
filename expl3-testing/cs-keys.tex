@@ -1,0 +1,24 @@
+\documentclass{article}
+
+% SYNOPSIS: Works as hoped
+
+\ExplSyntaxOn
+\keys_define:nn { test } {
+    A .cs_set:Np = \test_cs:n #1,
+    A .initial:n = { hallo }
+}
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+{
+    \keys_set:nn { test } {
+        A = welt~#1
+    }    
+    \test_cs:n { hallo }
+}
+\test_cs:n { test }
+\ExplSyntaxOff
+
+\end{document}
