@@ -1,0 +1,32 @@
+\documentclass{article}
+
+% SYNOPSIS: Grouping works as hoped: Keys are only locally set in an environment and can be accessed everywhere in the environment. 
+
+\ExplSyntaxOn
+\keys_define:nn { test } {
+    A .tl_set:N = \g_tmpa_tl,
+    A .initial:n = { hallo }
+}
+
+\NewDocumentEnvironment { testenv } {} {
+    \keys_set:nn { test } {
+        A = welt
+    }    
+    \tl_log:N \g_tmpa_tl
+} {
+    \tl_log:N \g_tmpa_tl
+}
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+
+\begin{testenv}
+
+\end{testenv}
+
+\tl_log:N \g_tmpa_tl
+\ExplSyntaxOff
+
+\end{document}
