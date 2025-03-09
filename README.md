@@ -1,7 +1,7 @@
 # `gaussEx.sty` - An expl3 extension of `gauss.sty`
-The `gaussEx.sty` is ...
+The LaTeX3 package `gaussEx.sty` is ...
 - ... a rewrite of the `gauss.sty` package [on CTAN](https://ctan.org/pkg/gauss) in the expl3 programming layer
-- ... extending the base functionality of `gauss.sty` by adding support vertical and horizontal dividers, custom row and column separation and a few more options for typesetting the matricies used for visualizing operations of the Gaussian elimination
+- ... extending the base functionality of `gauss.sty` by adding support for vertical and horizontal dividers, custom row and column separation and a few more options for typesetting the matricies used for visualizing operations of the Gaussian elimination
 
 What someone who has already used `gauss.sty` and now wants to make use of the new feature set of `gaussEx.sty` should pay attention to is listed and explained in the first section _Migrating from `gauss.sty`_. The second section _New features_  fully explains the new features of `gaussEx.sty` with a lot of concrete examples. 
 
