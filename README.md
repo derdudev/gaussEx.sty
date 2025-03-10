@@ -62,7 +62,7 @@ you now have to use `\SetGexOptions` by writing
 to "override" the options set by the previous `\SetGexOptions`. 
 
 ## Conflicts with AMSLaTeX
-Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) redefined AMSLaTeX environments like `pmatrix` and `Bmatrix`. This is a very ugly solution. Hence, `gaussEx.sty` does never globally (re-)define matrix environments and the `\newmatrix` mechanism from `gauss.sty` is now deprecated and not supported anymore. Delimiters are now explicitely given by the options `ldelim` and `rdelim`, and users can define _matrix classes_. 
+Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) redefined AMSLaTeX environments like `pmatrix` and `Bmatrix`. This is a very ugly solution. Hence, `gaussEx.sty` does never globally (re-)define matrix environments and the `\newmatrix` mechanism from `gauss.sty` is now deprecated and not supported anymore. Delimiters are now explicitely given by the options `ldelim` and `rdelim`, and authors can define _matrix classes_. 
 
  Internally, `gaussEx.sty` uses exactly the same rendering mechanism that also `gauss.sty` uses with `\newmatrix` but now privately. 
 
@@ -122,9 +122,9 @@ The row styling works analogously with the exception that there are no alignment
 ```
 
 ## Matrix classes 
-Instead of using `\newmatrix`, users can now define new matrix classes using `\NewGexMatrix`. This command takes two arguments: 
-1. The name of the matrix cls 
-2. The options that should be set under that cls 
+Instead of using `\newmatrix`, authors can now define new matrix classes using `\NewGexMatrix`. This command takes two arguments: 
+1. The name of the matrix class 
+2. The options that should be set under that class 
 
 For example, to create a matrix with `\left(` and `\right)` delimiters, one could write
 ```latex
