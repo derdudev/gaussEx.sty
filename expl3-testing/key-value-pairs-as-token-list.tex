@@ -1,0 +1,61 @@
+\documentclass{article}
+
+% SYNOPSIS: Decided against storing matrix class options as key-value pairs. This new implementation with two sequences (\g__gex_class_identifiers and \g__gex_class_options) seems to do just fine. 
+
+\ExplSyntaxOn
+
+\seq_new:N \g__gex_class_identifiers
+\seq_new:N \g__gex_class_options
+
+\str_new:N \g__gex_opt_cls
+\str_new:N \g__gex_opt_A
+\str_new:N \g__gex_opt_B
+
+\keys_define:nn { gex } {
+    A .tl_set:N = \g__gex_opt_A,
+    B .tl_set:N = \g__gex_opt_B,
+    cls .str_set:N = \g__gex_opt_cls,
+    cls .code:n = {
+        \int_set:Nn \l_tmpa_int { 1 }
+        \seq_map_inline:Nn \g__gex_class_identifiers { 
+            \str_if_eq:nnTF { ##1 } { #1 } {
+                \exp_args:Nne \keys_set:nn { gex } {
+                    \seq_item:Nn \g__gex_class_options { \l_tmpa_int }
+                }
+            } {}
+            \int_incr:N \l_tmpa_int
+        }
+    }
+}
+
+\NewDocumentCommand { \CreateClass } { m m } {
+    \seq_put_left:Nn \g__gex_class_identifiers { #1 }
+    \seq_put_left:Nn \g__gex_class_options { #2 }
+}
+
+\NewDocumentCommand { \UseClass } { m } {
+    \keys_set:nn { gex } {
+        cls = #1
+    }
+    \tl_log:N \g__gex_opt_A 
+    \tl_log:N \g__gex_opt_B 
+}
+
+\ExplSyntaxOff
+
+\begin{document}
+
+\CreateClass{p}{
+    A = 1, 
+    B = 2 
+}
+
+\CreateClass{b}{
+    A = 4, 
+    B = 5 
+}
+
+\UseClass{p}
+\UseClass{b}
+
+\end{document}
