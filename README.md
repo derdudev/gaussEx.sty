@@ -42,15 +42,15 @@ When in `gauss.sty` you would write something like
 \colarrowsep=.5em
 \def\rowaddfromlabel#1{\scriptstyle #1}
 ```
-you now have to use `\SetGexOptions` by writing
+you now have to use `\SetGexDefaults` by writing
 ```latex
-\SetGexOptions{
+\SetGexDefaults{
     colarrowsep = .5em,
     rowaddfromlabel = {\scriptstyle #1}
 }
 ```
 ## Option scope
-`\SetGexOptions` sets options locally (i.e. only in the current TeX group) as "defaults" for the `gexmatrix` environment. Of course, these defaults can be overriden for every single `gexmatrix` environment. For example, one could write
+`\SetGexDefaults` sets options locally (i.e. only in the current TeX group) as "defaults" for the `gexmatrix` environment. Of course, these defaults can be overriden for every single `gexmatrix` environment. For example, one could write
 ```latex
 \begin{gexmatrix}[
     colarrowsep = 1em,
@@ -59,12 +59,79 @@ you now have to use `\SetGexOptions` by writing
 ...
 \end{gexmatrix}
 ```
-to "override" the options set by the previous `\SetGexOptions`. 
+to "override" the options set by the previous `\SetGexDefaults`. 
 
 ## Conflicts with AMSLaTeX
 Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) redefined AMSLaTeX environments like `pmatrix` and `Bmatrix`. This is a very ugly solution. Hence, `gaussEx.sty` does never globally (re-)define matrix environments and the `\newmatrix` mechanism from `gauss.sty` is now deprecated and not supported anymore. Delimiters are now explicitely given by the options `ldelim` and `rdelim`, and authors can define _matrix classes_ (see section [Matrix classes](#matrix-classes)). 
 
- Internally, `gaussEx.sty` uses exactly the same rendering mechanism that also `gauss.sty` uses with `\newmatrix` but now privately. 
+ Internally, `gaussEx.sty` uses exactly the same typesetting mechanism that also `gauss.sty` uses with `\newmatrix` but now privately. 
+
+ ## Migrating a project using `gauss.sty` 
+ If you already have some large (or small) document that uses `gauss.sty`, you have to go through the following steps to migrate to the `gaussEx.sty` implementation and use all the new features: 
+ 
+1. Replace 
+    ```latex
+    \begin{gmatrix}[<delim type>]
+    ... 
+    \end{gmatrix}
+    ``` 
+    with 
+    ```latex
+    \begin{gexmatrix}[cls=<delim type>]
+    ... 
+    \end{gexmatrix}
+    ```
+    Or, if you just use the same `<delim type>` in your whole document, say 
+    ```latex
+    \SetGexDefaults{
+        cls = <delim type>
+    }
+    ```
+    in the preamble and then just write 
+    ```latex
+    \begin{gexmatrix}
+    ...
+    \end{gexmatrix}
+    ```
+    no need for any `cls` option. 
+
+2. In case you defined your own delimiters with `\gauss.sty` using `\newmatrix`, you have to replace your definition 
+    ```latex
+    \newmatrix{<left-delim>}{<right-delim>}{<idenfitier>}
+    ```
+    with 
+    ```latex
+    \NewGexMatrix{<identifier>}{
+        ldelim = <left-delim>,
+        rdelim = <right-delim>
+    }
+    ```
+
+3. If you used some custom implementations for the macros `gauss.sty` provides, e.g. 
+    ```latex
+    \def\rowmultlabel#1{|\cdot#1}
+    \def\rowaddfromlabel#1{\scriptscriptstyle +}
+    ```
+    you have to set them using `\SetGexDefaults`: 
+    ```latex
+    \SetGexDefaults{
+        rowmultlabel = {|\cdot#1},
+        rowaddfromlabel = {\scriptscriptstyle +}
+    }
+    ```
+
+4. If you set some new values for the TeX dimension, `gauss.sty` provides, e.g. 
+    ```latex
+    \colarrowsep=1em
+    \rowarrowsep=1.5em
+    ```
+    you have to set them using `\SetGexDefaults`: 
+    ```latex
+    \SetGexDefaults{
+        colarrowsep = 1em,
+        rowarrowsep = 1.5em
+    }
+    ```
 
 # New features
 
@@ -75,13 +142,13 @@ Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) rede
 - `ldelim`: Specifies the left delimiter of the matrix
 - `rdelim`: Specifies the right delimiter of the matrix
 - `colalign`: `l` (left), `c` (center), `r` (right) for the alignment of the content in a cell. The default ist `c`. There is no analogous key for rows (i.e. `rowalign` is not a key) as there simply is no row alignment in LaTeX. (Maybe cell padding?)
-- `visualcenter`: Takes no value. If it is passed to `\SetGexOptions` or `gexmatrix`, the horizontal dividers will be aligned to the visual center between two rows. This will lead to problems with cells that contain material with a large depth, so this option generally is only recommended when using small cell entries like numbers. 
+- `visualcenter`: Takes no value. If it is passed to `\SetGexDefaults` or `gexmatrix`, the horizontal dividers will be aligned to the visual center between two rows. This will lead to problems with cells that contain material with a large depth, so this option generally is only recommended when using small cell entries like numbers. 
 - `matrixpadding`: Padding of the matrix to the top, bottom, left and right in the format `<top and right and bottom and left>`, `<top and bottom> <left and right>` or `<top> <right> <bottom> <left>` (similar to how CSS is reading padding arguments). 
 - `vdivolen`: Overlength of the vertical dividers. If the overlength is larger than the top or bottom padding account for, the padding is automatically increased. 
 - `hdivolen`: Overlength of the horizontal dividers. If the overlength is larger than the left or right padding account for, the padding is automatically increased. 
 - `cls`: Identifier for a matrix class. `gaussEx.sty` predefines the matrix classes `p` (for `(`, `)` parenthesis), `b` (for `[`, `]` brackets), `B` (for `\lbrace`, `\rbrace` braces), `v` (for `\lvert`, `\rvert` delimiters) and `V` (for `\lVert`, `\rVert` delimiters). 
 
-Additionally, there are two options which can only be applied to `gexmatrix` environments directly and not via `\SetGexOptions`: 
+Additionally, there are two options which can only be applied to `gexmatrix` environments directly and not via `\SetGexDefaults`: 
 - `cols`: Styling options inspired by way the `array` environment specifies alignment and vertical dividers. 
 - `rows`: Styling options inspired by way the `array` environment specifies alignment and vertical dividers. Maybe in the future, `gaussEx.sty` will also support inline commands such at `\hline` and `\\[<distance>]` to regulate the spacing between rows and horizontal dividers. 
 
@@ -126,7 +193,7 @@ Instead of using `\newmatrix`, authors can now define new matrix classes using `
 1. The name of the matrix class 
 2. The options that should be set under that class 
 
-For example, to create a matrix with `\left(` and `\right)` delimiters, one could write
+For example, to create a matrix with `(` and `)` delimiters, one could write
 ```latex
 \NewGexMatrix{p}{
     ldelim = (, 
@@ -174,7 +241,7 @@ The `gexmatrix` environment reads in options in the ordering they were given. Fo
 ...
 \end{gexmatrix}
 ```
-would first apply the `matrixpadding` option with the value `2pt 2pt` and then override this option with `1pt`. Hence, the last instance of an option is always the that's being applied. There is no cascading of options happening. 
+would first apply the `matrixpadding` option with the value `2pt 2pt` and then override this option with `1pt`. Hence, the last instance of an option is always the one that's being applied. There is no cascading of options happening. 
 
 Similarly, 
 ```latex 
