@@ -40,7 +40,7 @@ The defaults for these options has been kept from `gauss.sty`.
 When in `gauss.sty` you would write something like 
 ```latex
 \colarrowsep=.5em
-\rowaddfromlabel#1{\scriptstyle #1}
+\def\rowaddfromlabel#1{\scriptstyle #1}
 ```
 you now have to use `\SetGexOptions` by writing
 ```latex
@@ -62,7 +62,7 @@ you now have to use `\SetGexOptions` by writing
 to "override" the options set by the previous `\SetGexOptions`. 
 
 ## Conflicts with AMSLaTeX
-Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) redefined AMSLaTeX environments like `pmatrix` and `Bmatrix`. This is a very ugly solution. Hence, `gaussEx.sty` does never globally (re-)define matrix environments and the `\newmatrix` mechanism from `gauss.sty` is now deprecated and not supported anymore. Delimiters are now explicitely given by the options `ldelim` and `rdelim`, and authors can define _matrix classes_. 
+Due to conflicts with earlier versions of AMSLaTeX, `gauss.sty` globally(!) redefined AMSLaTeX environments like `pmatrix` and `Bmatrix`. This is a very ugly solution. Hence, `gaussEx.sty` does never globally (re-)define matrix environments and the `\newmatrix` mechanism from `gauss.sty` is now deprecated and not supported anymore. Delimiters are now explicitely given by the options `ldelim` and `rdelim`, and authors can define _matrix classes_ (see section [Matrix classes](#matrix-classes)). 
 
  Internally, `gaussEx.sty` uses exactly the same rendering mechanism that also `gauss.sty` uses with `\newmatrix` but now privately. 
 

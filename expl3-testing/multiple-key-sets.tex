@@ -1,0 +1,21 @@
+\documentclass{article}
+
+% SYNOPSIS: Giving multiple values for the same key works as expected
+
+\ExplSyntaxOn
+\keys_define:nn { gex } {
+    A .tl_set:N = \l_tmpa_tl
+}
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+\keys_set:nn { gex } {
+    A = 1, 
+    A = 2
+}
+\tl_log:N \l_tmpa_tl
+\ExplSyntaxOff
+
+\end{document}
