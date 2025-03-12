@@ -2,19 +2,31 @@
 
 \usepackage{../gaussEx}
 
-% \SetGexDefaults{
-%     rowmultlabel = {|\cdot#1},
-%     rowarrowsep = 1cm,
-%     colarrowsep = 1cm,
-%     colopminsize = 1cm,
-%     rowopminsize = 1cm,
-%     opskip = 1.5cm,
-%     labelskip = .5cm,
-%     A = 2pt, 
-% }
+\SetGexDefaults{
+    rowmultlabel = {|\cdot#1},
+    rowswapfromlabel = {*},
+    rowswaptolabel = {*2},
+    rowaddfromlabel = {#1},
+    rowaddtolabel = {+},
+    colmultlabel = { 
+        \underline{\hbox to 1.2em{$\hss\mathstrut{}#1$}}
+    },
+    coladdfromlabel = {#1},
+    coladdtolabel = {+},
+    colswapfromlabel = {*},
+    colswaptolabel = {*2},
+    rowarrowsep = 1em,
+    colarrowsep = 1em,
+    colopminsize = 1em,
+    rowopminsize = 1em,
+    opskip = 6pt,
+    labelskip = .5em,
+    A = 2pt, 
+}
 
 \begin{document}
-Hallo Welt, wie geht es dir denn heute an diesem leider nicht besonders sonnigen Tag?
+Hallo Welt, wie geht es dir denn heute an diesem leider nicht besonders sonnigen Tag? Ich wäre ja eigentlich sehr gerne spazieren gegangen, aber das wird wohl nichts mehr. Der Frühling macht nun einmal was er will. 
+
 \begin{equation*}
     A = \begin{gexmatrix}{p}
         1 & 2 & 3 \\ 
@@ -22,9 +34,12 @@ Hallo Welt, wie geht es dir denn heute an diesem leider nicht besonders sonnigen
         \colops
         \add[-1]{2}{1}
         \add[-1]{0}{1}
+        \mult{0}{2}
+        \swap{0}{2}
         \rowops
         \add[2]{1}{0}
         \mult{1}{3}
+        \swap{0}{1}
     \end{gexmatrix}
 \end{equation*}
 \end{document}
