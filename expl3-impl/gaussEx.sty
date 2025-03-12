@@ -321,11 +321,11 @@
 %   #3: dim expression (something that can be evaluated by \dim_eval:n); the second y-coordiante
 % Function: Draws a vertical line from (#1,#2) to (#1,#3)
 \cs_new:Npn \__gex_vline:nnn #1#2#3 {
-    \iow_log:n {TC:#2;#3}
+    %\iow_log:n {TC:#2;#3}
     \dim_set:Nn \l_tmpa_dim { #3 }
-    \exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
+    %\exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
     \dim_sub:Nn \l_tmpa_dim { #2 }
-    \exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
+    %\exp_args:Ne \iow_log:n { TA2: \dim_eval:n { \l_tmpa_dim } }
     \put(\dim_to_decimal:n { #1 }, \dim_to_decimal:n { \dim_min:nn { #2 } { #3 } }){\line(0,1){\dim_to_decimal:n { \dim_abs:n { \l_tmpa_dim } }}}
 }
 
@@ -559,7 +559,7 @@
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
                         \int_step_inline:nnn { #7 } { #8 } {
                             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { ##1 } }
-                            \seq_gset_item:Nnn \g__gex_cy { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            \exp_args:NNNe \seq_gset_item:Nnn \g__gex_cy { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
                         }
                     \fi: 
                 \fi: 
@@ -581,7 +581,6 @@
         % TODO: Take index shift of sequences into account!
         \__gex_get_max_over_range:NnnN \g__gex_rx { 1 } { \g__gex_maxrow+1 } { \l_tmpa_dim }
         \box_set_wd:Nn \g__gex_eastbox { \l_tmpa_dim }
-        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \l__gex_opt_colarrowsep } { \box_use:N \g__gex_northbox } }
     }
     % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
     \DeclareDocumentCommand { \swap } { O{} O{} m m } {
@@ -712,7 +711,7 @@
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
                         \int_step_inline:nnn { #7 } { #8 } {
                             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
-                            \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            \exp_args:NNNe \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
                         }
                     \fi: 
                 \fi: 
@@ -736,7 +735,7 @@
     \dim_add:Nn \g__gex_tmpa_dim { 1pt }
     \dim_set:Nn \g__gex_tmpb_dim { \box_dp:N \g__gex_matrixbox }
     \dim_add:Nn \g__gex_tmpb_dim { 1pt }
-    \dim_set:Nn \g__gex_tmp_dim { \box_ht:N \g__gex_matrixbox }
+    \dim_set:Nn \g__gex_tmp_dim { \box_ht:N \g__gex_northbox }
     \box_set_ht:Nn \g__gex_northbox { 0pt }
     \box_set_dp:Nn \g__gex_northbox { 0pt }
     \dim_compare:nNnTF { \g__gex_tmp_dim } > { 0pt } {

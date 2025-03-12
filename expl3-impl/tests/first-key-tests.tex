@@ -2,24 +2,23 @@
 
 \usepackage{../gaussEx}
 
-\SetGexDefaults{
-    rowmultlabel = {|\cdot#1},
-    rowarrowsep = 1cm,
-    colarrowsep = 1cm,
-    colopminsize = 1cm,
-    rowopminsize = 1cm,
-    opskip = 1cm,
-    labelskip = .5cm,
-    A = 2pt, 
-}
+% \SetGexDefaults{
+%     rowmultlabel = {|\cdot#1},
+%     rowarrowsep = 1cm,
+%     colarrowsep = 1cm,
+%     colopminsize = 1cm,
+%     rowopminsize = 1cm,
+%     opskip = 1.5cm,
+%     labelskip = .5cm,
+%     A = 2pt, 
+% }
 
 \begin{document}
+Hallo Welt, wie geht es dir denn heute an diesem leider nicht besonders sonnigen Tag?
 \begin{equation*}
-    \begin{gexmatrix}{p}
+    A = \begin{gexmatrix}{p}
         1 & 2 & 3 \\ 
         4 & 5 & 6
-        \rowops 
-        \add[2]{0}{1}
         \colops
         \add[-1]{1}{2}
         \add[-1]{0}{1}
