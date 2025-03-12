@@ -537,12 +537,12 @@
                             \exp_args:Ne \iow_log:n { \dim_eval:n { \g__gex_tmp_dim }}
                             \exp_args:Neee \__gex_vline:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \dim_eval:n { \l_tmpa_dim } } { \dim_eval:n { \g__gex_tmp_dim } }
                         } {
-                            \exp_args:Neee \__gex_varrow:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \l_tmpa_dim } { \g__gex_tmp_dim }
+                            \exp_args:Neee \__gex_varrow:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \dim_eval:n { \l_tmpa_dim } } { \dim_eval:n { \g__gex_tmp_dim } }
                         }
                         \str_if_eq:nnTF { #2 } { 0 } {
-                            \exp_args:Neee \__gex_vline:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \l_tmpb_dim } { \g__gex_tmp_dim }
+                            \exp_args:Neee \__gex_vline:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \dim_eval:n { \l_tmpb_dim } } { \dim_eval:n { \g__gex_tmp_dim } }
                         } {
-                            \exp_args:Neee \__gex_varrow:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \l_tmpb_dim } { \g__gex_tmp_dim }
+                            \exp_args:Neee \__gex_varrow:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \dim_eval:n { \l_tmpb_dim } } { \dim_eval:n { \g__gex_tmp_dim } }
                         }
                         \exp_args:Neee \__gex_hline:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \dim_eval:n { \g__gex_tmp_dim } } { \seq_item:Nn \g__gex_cx { #8 } }
                         \hbox_set:Nn \l_tmpa_box { $#3{#5}$ }
