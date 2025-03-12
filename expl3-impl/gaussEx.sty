@@ -178,7 +178,7 @@
         \baselineskip0pt
         \dim_set:Nn \g__gex_tmpc_dim { #1 }
         \dim_compare:nNnTF { \g__gex_tmpc_dim } < { \g__gex_arrowht } {
-            \dim_set_eq:NN \g_g_ex_tmpc_dim \g__gex_arrowht
+            \dim_set_eq:NN \g__gex_tmpc_dim \g__gex_arrowht
         }{}
         \__gex_arrow_vline:
         \kern\dim_eval:n { \g__gex_tmpc_dim }
@@ -305,8 +305,18 @@
 % Replacement for \g@measureArea
 \cs_new:Npn \__gex_get_max_over_range:NnnN #1#2#3#4 {
     \dim_gset:Nn #4 { 0pt }
-    \int_step_inline:nnn { #2 } { #3 } {
-        \dim_gset:Nn #4 { \dim_max:nn { #4 } { \seq_item:Nn #1 { ##1 } } }
+    \int_compare:nNnTF { #2 } = { #3 } {
+        \dim_gset:Nn #4 { \seq_item:Nn #1 { #2 } }
+    } {
+        \int_compare:nNnTF { #2 } < { #3 } {
+            \int_step_inline:nnn { #2 } { #3 } {
+                \dim_gset:Nn #4 { \dim_max:nn { #4 } { \seq_item:Nn #1 { ##1 } } }
+            }
+        } {
+            \int_step_inline:nnn { #3 } { #2 } {
+                \dim_gset:Nn #4 { \dim_max:nn { #4 } { \seq_item:Nn #1 { ##1 } } }
+            }
+        }
     }
 }
 
@@ -533,7 +543,7 @@
                         } {
                             \exp_args:Neee \__gex_varrow:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \l_tmpb_dim } { \g__gex_tmp_dim }
                         }
-                        \exp_args:Neee \__gex_hline:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \g__gex_tmp_dim } { \seq_item:Nn \g__gex_cx { #8 } }
+                        \exp_args:Neee \__gex_hline:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \dim_eval:n { \g__gex_tmp_dim } } { \seq_item:Nn \g__gex_cx { #8 } }
                         \hbox_set:Nn \l_tmpa_box { $#3{#5}$ }
                         \hbox_set:Nn \l_tmpb_box { $#4{#5}$ }
                         \dim_compare:nNnTF { \box_ht:N \l_tmpa_box } > { 0pt } {
@@ -547,6 +557,7 @@
                         \dim_compare:nNnTF { \box_ht:N \l_tmpa_box } > { 0pt } {
                             \exp_args:Neee \__gex_cbox:nnn { \seq_item:Nn \g__gex_cx { #7 } } { \g__gex_tmp_dim } { \kern-1pt\vcenter{\box_use:N \l_tmpa_box} }
                             \dim_set:Nn \g__gex_tmpc_dim { \box_ht:N \g__gex_label }
+                            \exp_args:Ne \iow_log:n { TD:~ \dim_eval:n { \g__gex_tmpc_dim } }
                         } {}
                         \dim_compare:nNnTF { \box_ht:N \l_tmpb_box } > { 0pt } {
                             \exp_args:Neee \__gex_cbox:nnn { \seq_item:Nn \g__gex_cx { #8 } } { \g__gex_tmp_dim } { \kern-1pt\vcenter{\box_use:N \l_tmpb_box} }
@@ -557,9 +568,16 @@
                         \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpc_dim }
                         \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
-                        \int_step_inline:nnn { #7 } { #8 } {
-                            \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { ##1 } }
-                            \exp_args:NNNe \seq_gset_item:Nnn \g__gex_cy { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                        \int_compare:nNnTF { #7 } < { #8 } {
+                            \int_step_inline:nnn { #7 } { #8 } {
+                                \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { ##1 } }
+                                \exp_args:NNNe \seq_gset_item:Nnn \g__gex_cy { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            }
+                        } {
+                            \int_step_inline:nnn { #8 } { #7 } {
+                                \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { ##1 } }
+                                \exp_args:NNNe \seq_gset_item:Nnn \g__gex_cy { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            }
                         }
                     \fi: 
                 \fi: 
@@ -709,9 +727,16 @@
                         \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpc_dim }
                         \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
-                        \int_step_inline:nnn { #7 } { #8 } {
-                            \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
-                            \exp_args:NNNe \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                        \int_compare:nNnTF { #7 } < { #8 } {
+                            \int_step_inline:nnn { #7 } { #8 } {
+                                \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
+                                \exp_args:NNNe \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            }
+                        } {
+                            \int_step_inline:nnn { #8 } { #7 } {
+                                \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
+                                \exp_args:NNNe \seq_gset_item:Nnn \g__gex_rx { ##1 } { \dim_max:nn { \l_tmpa_dim } { \g__gex_tmp_dim } }
+                            }
                         }
                     \fi: 
                 \fi: 
