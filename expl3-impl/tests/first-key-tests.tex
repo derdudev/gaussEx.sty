@@ -1,0 +1,28 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\SetGexDefaults{
+    rowmultlabel = {|\cdot#1},
+    rowarrowsep = 1cm,
+    colarrowsep = 1cm,
+    colopminsize = 1cm,
+    rowopminsize = 1cm,
+    opskip = 1cm,
+    labelskip = .5cm,
+    A = 2pt, 
+}
+
+\begin{document}
+\begin{equation*}
+    \begin{gexmatrix}{p}
+        1 & 2 & 3 \\ 
+        4 & 5 & 6
+        \rowops 
+        \add[2]{0}{1}
+        \colops
+        \add[-1]{1}{2}
+        \add[-1]{0}{1}
+    \end{gexmatrix}
+\end{equation*}
+\end{document}

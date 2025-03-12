@@ -1,4 +1,4 @@
-\ProvidesPackage{gaussEx}[2025/03/02]
+\ProvidesPackage{gaussEx}[2025/03/11]
 \RequirePackage{amsmath}
 \RequirePackage{expl3}
 
@@ -45,6 +45,77 @@
 
 % Token lists
 \tl_new:N \l__gex_environment 
+
+% Variables for keys 
+\cs_new:Npn \l__gex_opt_rowmultlabel #1 { |\,#1 }
+\cs_new:Npn \l__gex_opt_rowswapfromlabel #1 { }
+\cs_new:Npn \l__gex_opt_rowswaptolabel #1 { }
+\cs_new:Npn \l__gex_opt_rowaddfromlabel #1 { \scriptstyle #1 }
+\cs_new:Npn \l__gex_opt_rowaddtolabel #1 { \scriptscriptstyle + }
+\cs_new:Npn \l__gex_opt_colmultlabel #1 { 
+    \underline{\hbox to 1.2em{$\hss\mathstrut{}#1\hss$}}
+}
+\cs_new:Npn \l__gex_opt_colswapfromlabel #1 { }
+\cs_new:Npn \l__gex_opt_colswaptolabel #1 { }
+\cs_new:Npn \l__gex_coladdfromlabel #1 { \scriptstyle #1 }
+\cs_new:Npn \l__gex_coladdtolabel #1 { \scriptscriptstyle + }
+
+\dim_new:N \l__gex_opt_rowarrowsep % implemented
+\dim_new:N \l__gex_opt_colarrowsep % implemented
+\dim_new:N \l__gex_opt_rowopminsize % implemented
+\dim_new:N \l__gex_opt_colopminsize % implemented
+
+% CAUTION: the following two options are badly named as they are dimensions and not skips!
+\dim_new:N \l__gex_opt_opskip % implemented
+\dim_new:N \l__gex_opt_labelskip % implemented
+
+% Defaults for the dimension and skip options (could also be set as .default:n in \key_define:nn but for performance reasons, the defaults are set here)
+\dim_set:Nn \l__gex_opt_rowarrowsep { .5em }
+\dim_set:Nn \l__gex_opt_colarrowsep { .5em }
+\dim_set:Nn \l__gex_opt_colopminsize { 3pt }
+\dim_set:Nn \l__gex_opt_rowopminsize { 3pt }
+
+\dim_set:Nn \l__gex_opt_opskip { 5pt }
+\dim_set:Nn \l__gex_opt_labelskip { 4pt }
+
+% Key definitions
+\keys_define:nn { gex } {
+    % Control sequences: gauss.sty macros with one arguments
+    rowmultlabel .cs_set:Np     = \l__gex_opt_rowmultlabel #1,
+    rowswapfromlabel .cs_set:Np = \l__gex_opt_rowswapfromlabel #1,
+    rowswaptolabel .cs_set:Np   = \l__gex_opt_rowswaptolabel #1,
+    rowaddfromlabel .cs_set:Np  = \l__gex_opt_rowaddfromlabel #1,
+    rowswaptolabel .cs_set:Np   = \l__gex_opt_rowswaptolabel #1,
+    colmultlabel .cs_set:Np     = \l__gex_opt_colmultlabel #1,
+    colswapfromlabel .cs_set:Np = \l__gex_opt_colswapfromlabel #1,
+    colswaptolabel .cs_set:Np   = \l__gex_opt_colswaptolabel #1,
+    coladdfromlabel .cs_set:Np  = \l__gex_opt_coladdfromlabel #1,
+    colswaptolabel .cs_set:Np   = \l__gex_opt_colswaptolabel #1,
+    % gauss.sty TeX dimensions 
+    rowarrowsep .dim_set:N  = \l__gex_opt_rowarrowsep,
+    colarrowsep .dim_set:N  = \l__gex_opt_colarrowsep,
+    rowopminsize .dim_set:N = \l__gex_opt_rowopminsize,
+    colopminsize .dim_set:N = \l__gex_opt_colopminsize,
+    % gauss.sty TeX skips
+    opskip .dim_set:N      = \l__gex_opt_opskip,
+    labelskip .dim_set:N   = \l__gex_opt_labelskip,
+}
+
+% TODO: \SetGexDefaults (and later \NewGexMatrix)
+\NewDocumentCommand { \SetGexDefaults } { m } {
+    \keys_define:nn { gex } {
+        unknown .undefine:, 
+        unknown .code:n = {
+            % here, later add error handling for private env options (such as cols and rows)
+            \exp_args:Ne \iow_log:n { The~ option~ "\l_keys_key_str"~ is~ unknown }
+        }
+    }
+    \keys_set:nn { gex } {
+        #1
+    }
+    \cs_log:N \l__gex_opt_rowmultlabel
+    \dim_log:N \l__gex_opt_rowarrowsep
+}
 
 % DEL: The \g@for macro does not need to be implemented as its functionality should be given by \int_step_inline
 
@@ -355,7 +426,7 @@
         % TODO: Take index shift of sequences into account!
         \__gex_get_max_over_range:NnnN \g__gex_cy { 1 } { \g__gex_maxcol+1 } { \l_tmpa_dim }
         \box_set_ht:Nn \g__gex_northbox { \l_tmpa_dim }
-        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \colarrowsep } { \box_use:N \g__gex_northbox } }
+        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \l__gex_opt_colarrowsep } { \box_use:N \g__gex_northbox } }
     }
     % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
     \DeclareDocumentCommand { \swap } { O{} O{} m m } {
@@ -387,7 +458,7 @@
             \__gex_cbox:nnn { \seq_item:Nn \g__gex_cx { #1 } } { \seq_item:Nn \g__gex_cy { #1 } } { \colmultlabel{#2} }
             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { #1 } }
             \dim_add:Nn \l_tmpa_dim { \box_ht:N \g__gex_label }
-            \exp_args:NNne \seq_set_item:Nnn \g__gex_cy { #1 } { \dim_eval:n { \l_tmpa_dim + \the\opskip } }
+            \exp_args:NNne \seq_set_item:Nnn \g__gex_cy { #1 } { \dim_eval:n { \l_tmpa_dim + \l__gex_opt_opskip } }
             % DEL: \g@update{sum}{cx#1}. 
         \fi:
     }
@@ -436,13 +507,13 @@
                         \dim_set:Nn \l_tmpb_dim { \seq_item:Nn \g__gex_cy { #8 } }
                         \str_if_eq:nnTF { #1 } { 0 } {
                             \exp_args:Ne \iow_log:n { TB1:\seq_item:Nn \g__gex_cy { #7 } }
-                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #7 } { \dim_eval:n { \l_tmpa_dim + \colopminsize } }
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #7 } { \dim_eval:n { \l_tmpa_dim + \l__gex_opt_colopminsize } }
                             \exp_args:Ne \iow_log:n { TB2:\seq_item:Nn \g__gex_cy { #7 } }
                         }{
                             \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #7 } { \dim_eval:n { \l_tmpa_dim + \g__gex_arrowht } }
                         }
                         \str_if_eq:nnTF { #2 } { 0 } {
-                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #8 } { \dim_eval:n { \l_tmpb_dim + \colopminsize } }
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #8 } { \dim_eval:n { \l_tmpb_dim + \l__gex_opt_colopminsize } }
                         } {
                             \exp_args:NNne \seq_gset_item:Nnn \g__gex_cy { #8 } { \dim_eval:n { \l_tmpb_dim + \g__gex_arrowht } }
                         }
@@ -466,10 +537,10 @@
                         \hbox_set:Nn \l_tmpa_box { $#3{#5}$ }
                         \hbox_set:Nn \l_tmpb_box { $#4{#5}$ }
                         \dim_compare:nNnTF { \box_ht:N \l_tmpa_box } > { 0pt } {
-                            \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                            \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_labelskip }
                         } {
                             \dim_compare:nNnTF { \box_ht:N \l_tmpb_box } > { 0pt } {
-                                \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                                \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_labelskip }
                             } {}
                         }
                         \dim_set:Nn \g__gex_tmpc_dim { 0pt }
@@ -484,7 +555,7 @@
                             } {}
                         } {}
                         \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpc_dim }
-                        \dim_add:Nn \g__gex_tmp_dim { \the\opskip }
+                        \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
                         \int_step_inline:nnn { #7 } { #8 } {
                             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_cy { ##1 } }
@@ -510,7 +581,7 @@
         % TODO: Take index shift of sequences into account!
         \__gex_get_max_over_range:NnnN \g__gex_rx { 1 } { \g__gex_maxrow+1 } { \l_tmpa_dim }
         \box_set_wd:Nn \g__gex_eastbox { \l_tmpa_dim }
-        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \colarrowsep } { \box_use:N \g__gex_northbox } }
+        \hbox_gset:Nn \g__gex_northbox { \box_move_up:nn { \l__gex_opt_colarrowsep } { \box_use:N \g__gex_northbox } }
     }
     % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
     \DeclareDocumentCommand { \swap } { O{} O{} m m } {
@@ -542,7 +613,7 @@
             \__gex_rbox:nnn { \seq_item:Nn \g__gex_rx { #1 } } { \seq_item:Nn \g__gex_ry { #1 } } { \rowmultlabel{#2} }
             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { #1 } }
             \dim_add:Nn \l_tmpa_dim { \box_wd:N \g__gex_label }
-            \exp_args:NNne \seq_set_item:Nnn \g__gex_rx { #1 } { \dim_eval:n { \l_tmpa_dim + \labelskip } } % maybe here use \opskip and not \labelskip 
+            \exp_args:NNne \seq_set_item:Nnn \g__gex_rx { #1 } { \dim_eval:n { \l_tmpa_dim + \l__gex_opt_labelskip } } % maybe here use \opskip and not \labelskip 
             % DEL: \g@update{sum}{rx#1}. 
         \fi:
     }
@@ -589,13 +660,13 @@
                         \dim_set:Nn \l_tmpb_dim { \seq_item:Nn \g__gex_rx { #8 } }
                         \str_if_eq:nnTF { #1 } { 0 } {
                             \exp_args:Ne \iow_log:n { TB1:\seq_item:Nn \g__gex_rx { #7 } }
-                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #7 } { \dim_eval:n { \l_tmpa_dim + \colopminsize } }
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #7 } { \dim_eval:n { \l_tmpa_dim + \l__gex_opt_rowopminsize } }
                             \exp_args:Ne \iow_log:n { TB2:\seq_item:Nn \g__gex_rx { #7 } }
                         }{
                             \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #7 } { \dim_eval:n { \l_tmpa_dim + \g__gex_arrowwd } }
                         }
                         \str_if_eq:nnTF { #2 } { 0 } {
-                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #8 } { \dim_eval:n { \l_tmpb_dim + \colopminsize } }
+                            \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #8 } { \dim_eval:n { \l_tmpb_dim + \l__gex_opt_rowopminsize } }
                         } {
                             \exp_args:NNne \seq_gset_item:Nnn \g__gex_rx { #8 } { \dim_eval:n { \l_tmpb_dim + \g__gex_arrowwd } }
                         }
@@ -619,10 +690,10 @@
                         \hbox_set:Nn \l_tmpa_box { $#3{#5}$ }
                         \hbox_set:Nn \l_tmpb_box { $#4{#5}$ }
                         \dim_compare:nNnTF { \box_wd:N \l_tmpa_box } > { 0pt } {
-                            \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                            \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_labelskip }
                         } {
                             \dim_compare:nNnTF { \box_wd:N \l_tmpb_box } > { 0pt } {
-                                \dim_add:Nn \g__gex_tmp_dim { \labelskip }
+                                \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_labelskip }
                             } {}
                         }
                         \dim_set:Nn \g__gex_tmpc_dim { 0pt }
@@ -637,7 +708,7 @@
                             } {}
                         } {}
                         \dim_add:Nn \g__gex_tmp_dim { \g__gex_tmpc_dim }
-                        \dim_add:Nn \g__gex_tmp_dim { \the\opskip }
+                        \dim_add:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
                         % TODO: Implement generally as \__gex_set_range_to_max_rsp (rsp = respecfively)
                         \int_step_inline:nnn { #7 } { #8 } {
                             \dim_set:Nn \l_tmpa_dim { \seq_item:Nn \g__gex_rx { ##1 } }
@@ -669,7 +740,7 @@
     \box_set_ht:Nn \g__gex_northbox { 0pt }
     \box_set_dp:Nn \g__gex_northbox { 0pt }
     \dim_compare:nNnTF { \g__gex_tmp_dim } > { 0pt } {
-        \dim_sub:Nn \g__gex_tmp_dim { \the\opskip }
+        \dim_sub:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
     } {}
     \dim_add:Nn \g__gex_tmp_dim { .5 \box_ht_plus_dp:N \g__gex_matrixbox }
     \begin{ pmatrix }
@@ -688,7 +759,7 @@
             }
         } 
     \end{ pmatrix }
-    \rule{\rowarrowsep}{0pt}
+    \rule{\dim_eval:n { \l__gex_opt_rowarrowsep } }{0pt}
     \rule{0pt}{\dim_eval:n { \g__gex_tmp_dim }}
     \vcenter{
         \hbox:n {
@@ -775,12 +846,5 @@
 \def\colswaptolabel#1{}
 \def\coladdfromlabel#1{\scriptstyle #1}
 \def\coladdtolabel#1{\scriptscriptstyle +}
-
-\newdimen\colarrowsep\colarrowsep=.5em
-\newdimen\rowarrowsep\rowarrowsep=.5em
-\newdimen\opskip\opskip=5pt
-\newdimen\labelskip\labelskip=4pt
-\newdimen\colopminsize\colopminsize=3pt
-\newdimen\rowopminsize\rowopminsize=3pt
 
 \endinput
