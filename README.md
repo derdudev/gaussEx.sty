@@ -7,9 +7,9 @@ What someone who has already used `gauss.sty` and now wants to make use of the n
 
 # Roadmap
 - [x] Reimplement `gauss.sty` in expl3 
-- [ ] Implement the old `gauss.sty` macros and dimensions as options
-- [ ] Implement the new options 
+- [x] Implement the old `gauss.sty` macros and dimensions as options
 - [ ] Implement matrix classes 
+- [ ] Implement the new options 
 
 # Migrating from `gauss.sty` 
 ## What is now deprecated
