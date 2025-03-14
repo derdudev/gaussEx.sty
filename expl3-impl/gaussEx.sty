@@ -69,6 +69,13 @@
 \dim_new:N \l__gex_opt_opskip 
 \dim_new:N \l__gex_opt_labelskip 
 
+% Local environment options
+\tl_new:N \l__gex_envopt_cols
+\tl_new:N \l__gex_envopt_rows
+
+% Environment specifier
+\bool_new:N \l__gex_in_env 
+
 % Defaults for the dimension and skip options (could also be set as .default:n in \key_define:nn but for performance reasons, the defaults are set here)
 \dim_set:Nn \l__gex_opt_rowarrowsep { .5em }
 \dim_set:Nn \l__gex_opt_colarrowsep { .5em }
@@ -85,12 +92,12 @@
     rowswapfromlabel .cs_set:Np = \l__gex_opt_rowswapfromlabel #1,
     rowswaptolabel .cs_set:Np   = \l__gex_opt_rowswaptolabel #1,
     rowaddfromlabel .cs_set:Np  = \l__gex_opt_rowaddfromlabel #1,
-    rowaddtolabel .cs_set:Np   = \l__gex_opt_rowaddtolabel #1,
+    rowaddtolabel .cs_set:Np    = \l__gex_opt_rowaddtolabel #1,
     colmultlabel .cs_set:Np     = \l__gex_opt_colmultlabel #1,
     colswapfromlabel .cs_set:Np = \l__gex_opt_colswapfromlabel #1,
     colswaptolabel .cs_set:Np   = \l__gex_opt_colswaptolabel #1,
     coladdfromlabel .cs_set:Np  = \l__gex_opt_coladdfromlabel #1,
-    coladdtolabel .cs_set:Np   = \l__gex_opt_coladdtolabel #1,
+    coladdtolabel .cs_set:Np    = \l__gex_opt_coladdtolabel #1,
     % gauss.sty TeX dimensions 
     rowarrowsep .dim_set:N  = \l__gex_opt_rowarrowsep,
     colarrowsep .dim_set:N  = \l__gex_opt_colarrowsep,
@@ -99,6 +106,25 @@
     % gauss.sty TeX skips
     opskip .dim_set:N      = \l__gex_opt_opskip,
     labelskip .dim_set:N   = \l__gex_opt_labelskip,
+    % Local environment keys
+    cols .code:n = {
+        \bool_if:nTF { \l__gex_in_env } {
+            % Attempting to set the key in an gexmatrix environment context => permitted!
+            \tl_set:Nn \l__gex_envopt_cols { #1 }
+        } {
+            % Attemting to set the keys in a context that is not tht gexmatrix environment => prohibited!
+            \PackageWarning{gaussEx}{ The~ option~ "cols"~ can~ only~ be~ used~ as~ an~ environment~ option~ for~ the~ "gexmatrix"~ environment.~ You~ attempted~ to~ set~ it~ using~ \SetGexDefaults.~ Here~ the~ option~ will~ be~ ignored. }
+        }
+    },
+    rows .code:n = {
+        \bool_if:nTF { \l__gex_in_env } {
+            % Attempting to set the key in an gexmatrix environment context => permitted!
+            \tl_set:Nn \l__gex_envopt_rows { #1 }
+        } {
+            % Attemting to set the keys in a context that is not tht gexmatrix environment => prohibited!
+            \PackageWarning{gaussEx}{ The~ option~ "rows"~ can~ only~ be~ used~ as~ an~ environment~ option~ for~ the~ "gexmatrix"~ environment.~ You~ attempted~ to~ set~ it~ using~ \SetGexDefaults.~ Here~ the~ option~ will~ be~ ignored. }
+        }
+    },
 }
 
 % TODO: \SetGexDefaults (and later \NewGexMatrix)
@@ -115,6 +141,15 @@
     }
     \cs_log:N \l__gex_opt_rowmultlabel
     \dim_log:N \l__gex_opt_rowarrowsep
+}
+
+% 
+% MATRIX CLASSES
+%
+\prop_new:N \l__gex_matrix_classes % use property lists instead of module keys as module keys are harder to create dynamically (then also the names for the corresponding tl variables would have to be dynamically generated, resulting in ugly code)
+
+\NewDocumentCommand { \NewGexClass } { m m } {
+    \prop_put:Nnn \l__gex_matrix_class { #1 } { #2 } % another advantage: \prop_put:Nnn automatically allows overriding!
 }
 
 % DEL: The \g@for macro does not need to be implemented as its functionality should be given by \int_step_inline
@@ -749,9 +784,14 @@
 %
 % MATRIX ENVIRONMENTS
 %
-\NewDocumentEnvironment { gexmatrix } { m } {
+\NewDocumentEnvironment { gexmatrix } { O{} } {
     \unitlength=1pt%
-    \tl_set:Nn \l__gex_environment { #1matrix }
+    %\tl_set:Nn \l__gex_environment { #1matrix }
+    \bool_set_true:N \l__gex_in_env 
+    \keys_set:nn { gex } { 
+        #1 
+    }
+    \bool_set_false:N \l__gex_in_env % not needed as the previous assignment is local 
     \begin{__gex_matrix}
 } {
     \end{__gex_matrix}

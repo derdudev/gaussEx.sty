@@ -1,0 +1,23 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+% SYNOPSIS: Using the bool environment specifier works perfectly fine
+
+\SetGexDefaults{
+    cols = ccc,
+    rows = xxx
+}
+
+\begin{document}
+\begin{equation*}
+    \begin{gexmatrix}[cols=ccc, rows=xxx]
+        1 & 2 & 3
+    \end{gexmatrix}
+\end{equation*}
+
+\SetGexDefaults{
+    cols = ccc,
+    rows = xxx
+}
+\end{document}

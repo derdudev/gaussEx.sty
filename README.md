@@ -8,6 +8,7 @@ What someone who has already used `gauss.sty` and now wants to make use of the n
 # Roadmap
 - [x] Reimplement `gauss.sty` in expl3 
 - [x] Implement the old `gauss.sty` macros and dimensions as options
+- [ ] Implement the option mechanism for the individual `gexmatrix` environments 
 - [ ] Implement matrix classes 
 - [ ] Implement the new options 
 
