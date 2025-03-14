@@ -1,0 +1,58 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+\usepackage{amssymb}
+
+% SYNOPSIS: Setting keys locally works 
+
+\SetGexDefaults{
+    colarrowsep = 2em,
+}
+
+\begin{document}
+Hallo Welt, wie geht es dir denn heute an diesem leider nicht besonders sonnigen Tag? Ich wäre ja eigentlich sehr gerne spazieren gegangen, aber das wird wohl nichts mehr. Der Frühling macht nun einmal was er will. 
+
+\begin{equation*}
+    A = \begin{gexmatrix}[colopminsize=1cm, rowopminsize=1cm]
+        1 & 2 & 3 \\ 
+        4 & 5 & 6
+        \colops
+        \add[-1]{2}{1}
+        \add[-1]{0}{1}
+        \mult{0}{2}
+        \swap{0}{2}
+        \rowops
+        \add[2]{1}{0}
+        \mult{1}{3}
+        \swap{0}{1}
+    \end{gexmatrix} \leadsto \begin{gexmatrix}
+        1 & 2 & 3 \\ 
+        4 & 5 & 6
+        \colops
+        \add[-1]{2}{1}
+        \add[-1]{0}{1}
+        \mult{0}{2}
+        \swap{0}{2}
+        \rowops
+        \add[2]{1}{0}
+        \mult{1}{3}
+        \swap{0}{1}
+    \end{gexmatrix}
+\end{equation*}
+Ein bisschen Zwischentext kann nie schaden. 
+\begin{equation*}
+    A = \begin{gexmatrix}[colarrowsep = .5em,]
+        1 & 2 & 3 \\ 
+        4 & 5 & 6
+        \colops
+        \add[-1]{2}{1}
+        \add[-1]{0}{1}
+        \mult{0}{2}
+        \swap{0}{2}
+        \rowops
+        \add[2]{1}{0}
+        \mult{1}{3}
+        \swap{0}{1}
+    \end{gexmatrix}
+\end{equation*}
+\end{document}

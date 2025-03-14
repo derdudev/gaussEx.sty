@@ -634,7 +634,7 @@
         \hbox_gset:Nn \g__gex_eastbox { \unhbox\l__gex_tmp_tex_box }
         % TODO: Take index shift of sequences into account!
         \__gex_get_max_over_range:NnnN \g__gex_rx { 1 } { \g__gex_maxrow+1 } { \l_tmpa_dim }
-        \box_set_wd:Nn \g__gex_eastbox { \l_tmpa_dim }
+        \box_gset_wd:Nn \g__gex_eastbox { \l_tmpa_dim } % CAUTION: this is not global in gauss.sty!
     }
     % Use DeclareDocumentCommand because its not clear whether \colops or \rowops is called first, so neither New or Renew is suitable here. 
     \DeclareDocumentCommand { \swap } { O{} O{} m m } {
@@ -828,6 +828,7 @@
     \rule{0pt}{\dim_eval:n { \g__gex_tmp_dim }}
     \vcenter{
         \hbox:n {
+            \exp_args:Ne \iow_log:n { TC2:~\dim_eval:n { \box_wd:N \g__gex_eastbox } }
             \box_move_down:nn { \g__gex_matrix_dp } { \box_use:N \g__gex_eastbox }
         }
     }
@@ -895,6 +896,9 @@
     \cs_gset_eq:NN \__gex_endregion: \__gex_endmatrix: 
     \cs_gset_eq:NN \rowops \__gex_east:
     \cs_gset_eq:NN \colops \__gex_north:
+    % CAUTION: quick fix
+    \seq_gclear:N \g__gex_cy
+    \seq_gclear:N \g__gex_rx
 }
 
 \ExplSyntaxOff
