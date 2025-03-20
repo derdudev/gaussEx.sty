@@ -146,22 +146,16 @@
             \PackageWarning{gaussEx}{ The~ option~ "rows"~ can~ only~ be~ used~ as~ an~ environment~ option~ for~ the~ "gexmatrix"~ environment.~ You~ attempted~ to~ set~ it~ using~ \SetGexDefaults.~ Here~ the~ option~ will~ be~ ignored. }
         }
     },
+    unknown .code:n = {
+        \exp_args:Nne \PackageWarning{gaussEx}{ There~ is~ no~ option~ "\l_keys_key_str",~ maybe~ you~ misspelled~ something.~ The~ option~ will~ just~ be~ ignored. }
+    },
 }
 
 % TODO: \SetGexDefaults (and later \NewGexMatrix)
 \NewDocumentCommand { \SetGexDefaults } { m } {
-    \keys_define:nn { gex } {
-        unknown .undefine:, 
-        unknown .code:n = {
-            % here, later add error handling for private env options (such as cols and rows)
-            \exp_args:Ne \iow_log:n { The~ option~ "\l_keys_key_str"~ is~ unknown }
-        }
-    }
     \keys_set:nn { gex } {
         #1
     }
-    \cs_log:N \l__gex_opt_rowmultlabel
-    \dim_log:N \l__gex_opt_rowarrowsep
 }
 
 % 
@@ -173,7 +167,7 @@
 \prop_put:Nnn \l__gex_matrix_classes { none } {  }
 \prop_put:Nnn \l__gex_matrix_classes { p } { 
     colarrowsep = 1cm
- }
+}
 
 \NewDocumentCommand { \NewGexClass } { m m } {
     \prop_put:Nnn \l__gex_matrix_classes { #1 } { #2 } % another advantage: \prop_put:Nnn automatically allows overriding!
