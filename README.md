@@ -190,6 +190,8 @@ The row styling works analogously with the exception that there are no alignment
 ```
 
 ## Matrix classes 
+The idea behind matrix classes is to assign an identifier to a certain group of options and use this to set these options as the "base styling" for `gexmatrix` matrices, in analogy to classes for LaTeX documents (FOOTNOTE: LaTeX classes actually are a somewhat bad analogy as they require certain configurations. Matrix classes on the other hand do not require any specific options to be set.) or CSS classes for HTML elements. This base styling can then of course be overriden individually for each `gexmatrix` environment. Hence, matrix classes basically extend the functionality of the `\newmatrix` mechanism from `gauss.sty`. 
+
 Instead of using `\newmatrix`, authors can now define new matrix classes using `\NewGexMatrix`. This command takes two arguments: 
 1. The name of the matrix class 
 2. The options that should be set under that class 
@@ -259,3 +261,69 @@ Similarly,
 \end{gexmatrix}
 ```
 would first compute the matrix class `p`, i.e. set the options `ldelim`, `rdelim` and `matrixpadding` as specified in the  `\NewGexMatrix` definition and then set the `matrixpadding` option to `1pt`. 
+
+If you set a default matrix class as in 
+```latex 
+% Preamble code 
+\NewGexMatrix{p}{
+    ldelim = (, 
+    rdelim = ),
+    matrixpadding = 2pt 2pt, 
+}
+
+\SetGexDefaults{
+    cls = p, % here the options of the matrix class do not get set yet
+    matrixpadding = 1pt,
+}
+
+% Document code 
+% Matrix A
+\begin{gexmatrix}
+...
+\end{gexmatrix}
+
+% Matrix B
+\begin{gexmatrix}[cls=none]
+...
+\end{gexmatrix}
+```
+then the class will be applied as the first option of matrix A. So the actual `matrixpadding` being applied to matrix A is `2pt 2pt`. However, for matrix B, the class `p` won't be applied, so the computed `matrixpadding` for matrix B is `1pt` as specified with `\SetGexDefaults`. 
+
+In general you should think of the option mechanism in the following hierarchy: 
+```
+Defaults (global styling) 
+> Matrix classes (base styling) 
+> Local options (local styling)
+```
+However, as matrix classes can also be set as local options, you can also do things like 
+```latex 
+% Preamble code 
+\NewGexMatrix{c1}{
+    colsep = .5em,
+    matrixpadding = 2pt 2pt, 
+
+}
+\NewGexMatrix{c2}{
+    rowsep = .5em,
+    matrixpadding = 4pt 4pt, 
+}
+
+\SetGexDefaults{
+    colsep = .25em,
+    rowsep = .25em
+}
+
+% Document code 
+\begin{gexmatrix}[cls=t1, matrixpadding=1pt, cls=t2]
+...
+\end{gexmatrix}
+```
+Here, the options get processed in the usual order: First, the options of class `c1` are set, i.e. `colsep=.5em` and `matrixpadding=2pt 2pt`. Then the `matrixpadding` option from `c1` gets overriden with the local option `matrixpadding=1pt`. Then the options of class `c2` get applied, so now `rowsep=.5em` and `matrixpadding=4pt 4pt`. Altogether, the matrix is typeset with the following options: 
+```
+colsep = .5em (from class c1, overriding the default colsep=.25em),
+rowsep = .5em (from class c2, overriding the default rowsep=.25em)
+matrixpadding = 4pt 4pt (from class c2, overriding the local 
+option matrixpadding=1pt which in turn overrides the option 
+matrixpadding=2pt 2pt from the class c1),
+```
+As you can see, this can get really confusing really quickly. This is why we suggest to really follow the hierarchy mentioned above by setting only one `cls` option per `gexmatrix` environment and to do this always as the first option. This makes it easier to quickly understand which options actually get applied to a given `gexmatrix` environment. 

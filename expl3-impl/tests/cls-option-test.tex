@@ -1,0 +1,23 @@
+\documentclass{article}
+
+\usepackage{../gaussEx}
+
+\NewGexClass{cc}{
+    colarrowsep = 2cm,
+    colopminsize = 1cm
+}
+
+\SetGexDefaults{
+    cls = p
+}
+
+\begin{document}
+\begin{equation*}
+    \begin{gexmatrix}
+        1 & 2 & 3 \\
+        4 & 5 & 6
+        \colops
+        \add[-1]{0}{2}
+    \end{gexmatrix}
+\end{equation*}
+\end{document}

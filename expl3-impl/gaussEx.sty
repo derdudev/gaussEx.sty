@@ -69,6 +69,9 @@
 \dim_new:N \l__gex_opt_opskip 
 \dim_new:N \l__gex_opt_labelskip 
 
+% Matrix class option
+\str_new:N \l__gex_opt_cls
+
 % Local environment options
 \tl_new:N \l__gex_envopt_cols
 \tl_new:N \l__gex_envopt_rows
@@ -84,6 +87,8 @@
 
 \dim_set:Nn \l__gex_opt_opskip { 5pt }
 \dim_set:Nn \l__gex_opt_labelskip { 4pt }
+
+\str_set:Nn \l__gex_opt_cls { none }
 
 % Key definitions
 \keys_define:nn { gex } {
@@ -106,6 +111,22 @@
     % gauss.sty TeX skips
     opskip .dim_set:N      = \l__gex_opt_opskip,
     labelskip .dim_set:N   = \l__gex_opt_labelskip,
+    % Matrix class
+    cls .code:n = {
+        \prop_if_in:NnTF \l__gex_matrix_classes { #1 } {
+            % There exists some matrix class with the identifier #1
+            \str_set:Nn \l__gex_opt_cls { #1 }
+            \bool_if:nTF { \l__gex_in_env } {
+                \prop_get:NnN \l__gex_matrix_classes { #1 } \l_tmpa_tl
+                \exp_args:Nne \keys_set:nn { gex } {
+                    \tl_use:N \l_tmpa_tl
+                }
+            } {}
+        } {
+            % There does not exists a matrix class with the identifier #1
+            \PackageWarning{gaussEx}{Up~ until~ this~ point~ no~ matrix~ class~ "#1"~ has~ been~ defined~ using~ \NewGexClass,~ so~ this~ option~ will~ be~ ignored.}
+        }
+    },
     % Local environment keys
     cols .code:n = {
         \bool_if:nTF { \l__gex_in_env } {
@@ -148,8 +169,14 @@
 %
 \prop_new:N \l__gex_matrix_classes % use property lists instead of module keys as module keys are harder to create dynamically (then also the names for the corresponding tl variables would have to be dynamically generated, resulting in ugly code)
 
+% Initialize with all the default gaussEx.sty classes
+\prop_put:Nnn \l__gex_matrix_classes { none } {  }
+\prop_put:Nnn \l__gex_matrix_classes { p } { 
+    colarrowsep = 1cm
+ }
+
 \NewDocumentCommand { \NewGexClass } { m m } {
-    \prop_put:Nnn \l__gex_matrix_class { #1 } { #2 } % another advantage: \prop_put:Nnn automatically allows overriding!
+    \prop_put:Nnn \l__gex_matrix_classes { #1 } { #2 } % another advantage: \prop_put:Nnn automatically allows overriding!
 }
 
 % DEL: The \g@for macro does not need to be implemented as its functionality should be given by \int_step_inline
@@ -788,10 +815,20 @@
     \unitlength=1pt%
     %\tl_set:Nn \l__gex_environment { #1matrix }
     \bool_set_true:N \l__gex_in_env 
+    \str_if_in:nnTF { #1 } { cls } {
+        % the option cls is specified as a local option
+    } {
+        % the default for the cls option should be used
+        \exp_args:Nne \keys_set:nn { gex } {
+            cls = \l__gex_opt_cls
+        }
+    }
     \keys_set:nn { gex } { 
         #1 
     }
     \bool_set_false:N \l__gex_in_env % not needed as the previous assignment is local 
+    \str_log:N \l__gex_opt_cls
+    \dim_log:N \l__gex_opt_colarrowsep
     \begin{__gex_matrix}
 } {
     \end{__gex_matrix}
