@@ -12,8 +12,8 @@ The section [Migrating from `gauss.sty`](#migrating-from-gausssty) explains what
 - [x] Implement matrix classes 
 - [ ] Implement the new options 
     - [x] `cls`
-    - [ ] `ldelim`
-    - [ ] `rdelim`
+    - [x] `ldelim`
+    - [x] `rdelim`
     - [ ] `cols` 
     - [ ] `rows`
     - [ ] `colalign`

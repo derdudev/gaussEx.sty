@@ -1,0 +1,16 @@
+\documentclass{article}
+
+\makeatletter
+\newenvironment{testenv}{
+    \let\testenvinner\@empty
+    \let\endtestenvinner\@empty
+    \begin{testenvinner}
+}{\end{testenvinner}}
+\newenvironment{testenvinner}{Start}{Ende}
+\makeatother
+
+\begin{document}
+\begin{testenv}
+Mitte
+\end{testenv}
+\end{document}

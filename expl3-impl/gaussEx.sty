@@ -76,6 +76,10 @@
 \tl_new:N \l__gex_envopt_cols
 \tl_new:N \l__gex_envopt_rows
 
+% Delimiters
+\tl_new:N \l__gex_opt_ldelim
+\tl_new:N \l__gex_opt_rdelim
+
 % Environment specifier
 \bool_new:N \l__gex_in_env 
 
@@ -127,6 +131,9 @@
             \PackageWarning{gaussEx}{Up~ until~ this~ point~ no~ matrix~ class~ "#1"~ has~ been~ defined~ using~ \NewGexClass,~ so~ this~ option~ will~ be~ ignored.}
         }
     },
+    % Delimiters
+    ldelim .tl_set:N = \l__gex_opt_ldelim, 
+    rdelim .tl_set:N = \l__gex_opt_rdelim,
     % Local environment keys
     cols .code:n = {
         \bool_if:nTF { \l__gex_in_env } {
@@ -166,7 +173,24 @@
 % Initialize with all the default gaussEx.sty classes
 \prop_put:Nnn \l__gex_matrix_classes { none } {  }
 \prop_put:Nnn \l__gex_matrix_classes { p } { 
-    colarrowsep = 1cm
+    ldelim = (,
+    rdelim = )
+}
+\prop_put:Nnn \l__gex_matrix_classes { b } { 
+    ldelim = [,
+    rdelim = ]
+}
+\prop_put:Nnn \l__gex_matrix_classes { B } { 
+    ldelim = \lbrace,
+    rdelim = \rbrace
+}
+\prop_put:Nnn \l__gex_matrix_classes { v } { 
+    ldelim = \lvert,
+    rdelim = \rvert
+}
+\prop_put:Nnn \l__gex_matrix_classes { V } { 
+    ldelim = \lVert,
+    rdelim = \rVert
 }
 
 \NewDocumentCommand { \NewGexClass } { m m } {
@@ -826,6 +850,7 @@
     \begin{__gex_matrix}
 } {
     \end{__gex_matrix}
+    % The next two lines are not needed anymore. This is just a relict of the gauss.sty versions that did not overwrite the AMSLaTeX environments. 
     % \cs_set_eq:Nc \matrix { } % \let\matrix\@empty
     % \cs_set_eq:Nc \endmatrix { } % \let\endmatrix\@empty
     \dim_set:Nn \g__gex_tmpa_dim { \box_ht:N \g__gex_matrixbox }
@@ -839,7 +864,10 @@
         \dim_sub:Nn \g__gex_tmp_dim { \l__gex_opt_opskip }
     } {}
     \dim_add:Nn \g__gex_tmp_dim { .5 \box_ht_plus_dp:N \g__gex_matrixbox }
-    \begin{ pmatrix }
+    % CAUTION: This is unprotected!
+    \tl_if_blank:nTF { \l__gex_opt_ldelim } {} { 
+        \left\tl_use:N \l__gex_opt_ldelim
+    }
         \vcenter{
             \hbox {
                 \rlap{
@@ -854,7 +882,10 @@
                 % \box_move_down:nn { \box_dp:N \g__gex_matrixbox } { \hbox:n { \rule{.2pt}{9.36pt}\rule{.2pt}{36.67pt} } }
             }
         } 
-    \end{ pmatrix }
+    % CAUTION: This is unprotected!
+    \tl_if_blank:nTF { \l__gex_opt_rdelim } {} { 
+        \right\tl_use:N \l__gex_opt_rdelim
+    }
     \rule{\dim_eval:n { \l__gex_opt_rowarrowsep } }{0pt}
     \rule{0pt}{\dim_eval:n { \g__gex_tmp_dim }}
     \vcenter{
