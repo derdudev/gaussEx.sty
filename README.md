@@ -167,6 +167,8 @@ Additionally, there are two options which can only be applied to `gexmatrix` env
 - `cols`: Styling options inspired by way the `array` environment specifies alignment and vertical dividers. 
 - `rows`: Styling options inspired by way the `array` environment specifies alignment and vertical dividers. Maybe in the future, `gaussEx.sty` will also support inline commands such at `\hline` and `\\[<distance>]` to regulate the spacing between rows and horizontal dividers. 
 
+NOTE: The behaviour of these two options is very likely to change in the near future. I am working on an implementation that allows to specify e.g. only the aligment for the first to columns but not care about the rest, so in particular not really care about how many columns there actually are. 
+
 These two options are a little more complicated than the rest but should still be quite straight forward. For example, consider the following matrix
 ```latex
 \begin{gexmatrix}[cls=p]

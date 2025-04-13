@@ -139,6 +139,7 @@
         \bool_if:nTF { \l__gex_in_env } {
             % Attempting to set the key in an gexmatrix environment context => permitted!
             \tl_set:Nn \l__gex_envopt_cols { #1 }
+            \__gex_parse_col_opts:n { #1 }
         } {
             % Attemting to set the keys in a context that is not tht gexmatrix environment => prohibited!
             \PackageWarning{gaussEx}{ The~ option~ "cols"~ can~ only~ be~ used~ as~ an~ environment~ option~ for~ the~ "gexmatrix"~ environment.~ You~ attempted~ to~ set~ it~ using~ \SetGexDefaults.~ Here~ the~ option~ will~ be~ ignored. }
@@ -163,6 +164,75 @@
     \keys_set:nn { gex } {
         #1
     }
+}
+
+%
+% KEY FUNCTIONS
+%
+\seq_new:N \g__gex_caligns % alignments
+\seq_new:N \g__gex_cseps % separators
+\seq_new:N \g__gex_cdivs % dividers
+\seq_new:N \g__gex_cdiv_olens % overlengths
+\cs_new:Npn \__gex_parse_col_opts:n #1 {
+    \seq_clear:N \l_tmpa_seq
+    \tl_set:Nn \l_tmpa_tl { #1 }
+    \iow_log:n { #1 }
+
+    \seq_clear:N \g__gex_caligns
+    \seq_clear:N \g__gex_cseps
+    \seq_clear:N \g__gex_cdivs
+    \seq_clear:N \g__gex_cdiv_olens
+
+    \regex_extract_all:nnN { [lcrx]|\||[SO]\cB\{ \c[^BE].* \cE\} } { #1 } \l_tmpa_seq
+    \seq_map_inline:Nn \l_tmpa_seq {
+        \tl_if_blank:nF { ##1 } {
+            % Parse the column tokens
+            \str_case:nnF { ##1 } {
+                {c}{ 
+                    \seq_gput_right:Nn \g__gex_caligns { c }
+                    \seq_gput_right:Nn \g__gex_cseps { 0pt }
+                    \seq_gput_right:Nn \g__gex_cdiv_olens { }
+                    \seq_gput_right:Nn \g__gex_cdivs { \c_false_bool }
+                }
+                {l}{ 
+                    \seq_gput_right:Nn \g__gex_caligns { l }
+                    \seq_gput_right:Nn \g__gex_cseps { 0pt }
+                    \seq_gput_right:Nn \g__gex_cdiv_olens { }
+                    \seq_gput_right:Nn \g__gex_cdivs { \c_false_bool }
+                }
+                {r}{ 
+                    \seq_gput_right:Nn \g__gex_caligns { r }
+                    \seq_gput_right:Nn \g__gex_cseps { 0pt }
+                    \seq_gput_right:Nn \g__gex_cdiv_olens { }
+                    \seq_gput_right:Nn \g__gex_cdivs { \c_false_bool }
+                }
+                {x}{ 
+                    \seq_gput_right:Nn \g__gex_caligns { x }
+                    \seq_gput_right:Nn \g__gex_cseps { 0pt }
+                    \seq_gput_right:Nn \g__gex_cdiv_olens { }
+                    \seq_gput_right:Nn \g__gex_cdivs { \c_false_bool }
+                }
+                {|}{ 
+                    \exp_args:NNnx \seq_gset_item:Nnn \g__gex_cdivs { \seq_count:N \g__gex_caligns } { \c_true_bool }
+                }
+            } {
+                \str_case:en { \tl_head:n { #1 } } {
+                    {S}{ 
+                        \regex_extract_once:nnN { S\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                        \exp_args:NNnx \seq_gset_item:Nnn \g__gex_cseps { \seq_count:N \g__gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+                    }
+                    {O}{
+                        \regex_extract_once:nnN { O\cB\{ (\c[^BE].*) \cE\} } { #1 } \l_tmpa_seq
+                        \exp_args:NNnx \seq_gset_item:Nnn \g__gex_cdiv_olens { \seq_count:N \g__gex_caligns } { \seq_item:Nn \l_tmpa_seq { 2 } }
+                    }
+                }
+            }
+        }
+    }
+    \seq_log:N \g__gex_caligns
+    \seq_log:N \g__gex_cseps
+    \seq_log:N \g__gex_cdivs
+    \seq_log:N \g__gex_cdiv_olens
 }
 
 % 
@@ -865,7 +935,7 @@
     } {}
     \dim_add:Nn \g__gex_tmp_dim { .5 \box_ht_plus_dp:N \g__gex_matrixbox }
     % CAUTION: This is unprotected!
-    \tl_if_blank:nTF { \l__gex_opt_ldelim } {} { 
+    \tl_if_empty:NTF { \l__gex_opt_ldelim } { \left. } { 
         \left\tl_use:N \l__gex_opt_ldelim
     }
         \vcenter{
@@ -883,7 +953,8 @@
             }
         } 
     % CAUTION: This is unprotected!
-    \tl_if_blank:nTF { \l__gex_opt_rdelim } {} { 
+    \tl_log:N \l__gex_opt_rdelim
+    \tl_if_empty:NTF { \l__gex_opt_rdelim } { \right. } { 
         \right\tl_use:N \l__gex_opt_rdelim
     }
     \rule{\dim_eval:n { \l__gex_opt_rowarrowsep } }{0pt}
@@ -964,8 +1035,5 @@
 }
 
 \ExplSyntaxOff
-
-\def\coladdfromlabel#1{\scriptstyle #1}
-\def\coladdtolabel#1{\scriptscriptstyle +}
 
 \endinput
